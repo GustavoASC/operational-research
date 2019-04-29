@@ -6,6 +6,7 @@
 package cassel.operational.research;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
@@ -83,10 +84,12 @@ public class MainWindow extends JFrame {
      */
     private JPanel buildConfigsFieldsPanel() {
         JPanel configsFieldsPanel = new JPanel();
-        configsFieldsPanel.setLayout(new GridLayout(3, 0));
+        configsFieldsPanel.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY));
+        configsFieldsPanel.setLayout(new GridLayout(4, 0));
         configsFieldsPanel.add(buildConfigsVariablePanel());
         configsFieldsPanel.add(buildConfigsFunctionPanel());
         configsFieldsPanel.add(buildConfigsRestrictionsPanel());
+        configsFieldsPanel.add(buildCreditsPanel());
         return configsFieldsPanel;
     }
 
@@ -97,7 +100,10 @@ public class MainWindow extends JFrame {
      */
     private JPanel buildConfigsVariablePanel() {
         JPanel variablesPanel = new JPanel(new BorderLayout());
-        variablesPanel.add(new JLabel("Variables"), BorderLayout.NORTH);
+        variablesPanel.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY));
+        JPanel labelPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        labelPanel.add(new JLabel("Variáveis"));
+        variablesPanel.add(labelPanel, BorderLayout.NORTH);
         variablesPanel.add(buildVariablesTable(), BorderLayout.CENTER);
         return variablesPanel;
     }
@@ -108,13 +114,16 @@ public class MainWindow extends JFrame {
      * @return JComponent
      */
     private JComponent buildVariablesTable() {
-        String[][] data = {{"", "", ""}, {"", "", ""}, {"", "", ""}};
-        String[] cols = {"Name", "Description", "Value"};
+        JPanel panel = new JPanel();
+        String[][] data = {{"", ""}, {"", ""}};
+        String[] cols = {"Nome", "Descrição"};
         JTable table = new JTable(data, cols);
+        table.setBorder(BorderFactory.createEmptyBorder());
         JScrollPane sp = new JScrollPane(table);
         sp.setBorder(BorderFactory.createEmptyBorder());
         sp.setPreferredSize(new Dimension(300, 86));
-        return sp;
+        panel.add(sp);
+        return panel;
     }
 
     /**
@@ -123,8 +132,23 @@ public class MainWindow extends JFrame {
      * @return JComponent
      */
     private JComponent buildConfigsFunctionPanel() {
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY));
+        JPanel labelPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        labelPanel.add(new JLabel("Função objetivo "));
+        panel.add(labelPanel, BorderLayout.NORTH);
+        panel.add(buildConfigsFunctionFields(), BorderLayout.CENTER);
+        return panel;
+    }
+    
+    /**
+     * Builds panel to contain objective function fields
+     * 
+     * @return JComponent
+     */
+    private JComponent buildConfigsFunctionFields() {
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        panel.add(new JLabel("Function: "));
+        panel.setBorder(BorderFactory.createEmptyBorder());
         panel.add(buildFunctionTypeCombo());
         panel.add(buildTargetFunctionField());
         return panel;
@@ -137,7 +161,32 @@ public class MainWindow extends JFrame {
      */
     private JComponent buildConfigsRestrictionsPanel() {
         JPanel panel = new JPanel(new BorderLayout());
-        panel.add(new JLabel("Restriction: "), BorderLayout.NORTH);
+        panel.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY));
+        JPanel labelPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        labelPanel.add(new JLabel("Restrições"));
+        panel.add(labelPanel, BorderLayout.NORTH);
+        panel.add(buildNonNegativeValuesPanel());
+        return panel;
+    }
+    
+    private JComponent buildNonNegativeValuesPanel() {
+        return new JPanel();
+    }
+    
+    /**
+     * Creates a credit panel
+     * 
+     * @return JComponent
+     */
+    private JComponent buildCreditsPanel() {
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY));
+        JPanel namePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        namePanel.add(new JLabel("Créditos: Gustavo Cassel"));
+        panel.add(namePanel, BorderLayout.NORTH);
+        JPanel universityPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        universityPanel.add(new JLabel("Universidade: Feevale"));
+        panel.add(universityPanel, BorderLayout.CENTER);
         return panel;
     }
 
@@ -156,7 +205,7 @@ public class MainWindow extends JFrame {
      * @return JButton
      */
     private JButton buildChartRenderingButton() {
-        JButton render = new JButton("Render chart");
+        JButton render = new JButton("Renderizar gráfico");
         render.addActionListener((ActionEvent event) -> {
             JPanel renderedChart = new ChartPanel(new OperationalResearchRenderer().render());
             chartPanel.removeAll();
@@ -173,7 +222,7 @@ public class MainWindow extends JFrame {
      * @return JComboBox
      */
     private JComboBox buildFunctionTypeCombo() {
-        JComboBox functionType = new JComboBox<OperationalResearchRenderer.FunctionType>();
+        JComboBox<OperationalResearchRenderer.FunctionType> functionType = new JComboBox<>();
         functionType.addItem(OperationalResearchRenderer.FunctionType.MAX);
         functionType.addItem(OperationalResearchRenderer.FunctionType.MIN);
         return functionType;
