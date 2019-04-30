@@ -46,7 +46,7 @@ public class MainWindow extends JFrame {
      * Builds the application's main window components
      */
     private void buildGui() {
-        setTitle("Operational Research Equation Renderer");
+        setTitle("Renderizador de Equações - Pesquisa Operacional");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         getContentPane().add(buildMainPanel());
         setSize(800, 600);
