@@ -19,34 +19,34 @@ import org.jfree.data.category.DefaultCategoryDataset;
 public class OperationalResearchRenderer {
 
     /* Target/objective function */
-    private String targetFunction;
+    private String objectiveFunction;
     /* Type of the Target/objective function */
-    private FunctionType targetFunctionType;
+    private FunctionType objectFunctionType;
     /* Variables */
     private final List<Variable> variables;
 
     public OperationalResearchRenderer() {
         this.variables = new LinkedList<>();
-        this.targetFunction = "";
-        this.targetFunctionType = FunctionType.MIN;
+        this.objectiveFunction = "";
+        this.objectFunctionType = FunctionType.MIN;
     }
 
     /**
      * Sets the target function equation
      * 
-     * @param targetFunction target function equation
+     * @param objectiveFunction target function equation
      */
-    public void setTargetFunction(String targetFunction) {
-        this.targetFunction = targetFunction;
+    public void setObjectiveFunction(String objectiveFunction) {
+        this.objectiveFunction = objectiveFunction;
     }
 
     /**
      * Sets the target function type (MIN or MAX)
      * 
-     * @param targetFunctionType target type
+     * @param objectFunctionType target type
      */
-    public void setTargetFunctionType(FunctionType targetFunctionType) {
-        this.targetFunctionType = targetFunctionType;
+    public void setObjectFunctionType(FunctionType objectFunctionType) {
+        this.objectFunctionType = objectFunctionType;
     }
     
     /**
