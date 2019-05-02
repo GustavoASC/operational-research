@@ -88,7 +88,7 @@ public class MainWindow extends JFrame {
         configsFieldsPanel.setLayout(new GridLayout(4, 0));
         configsFieldsPanel.add(buildConfigsVariablePanel());
         configsFieldsPanel.add(buildConfigsFunctionPanel());
-        configsFieldsPanel.add(buildConfigsRestrictionsPanel());
+        configsFieldsPanel.add(buildConfigsConstraintsPanel());
         configsFieldsPanel.add(buildCreditsPanel());
         return configsFieldsPanel;
     }
@@ -159,15 +159,38 @@ public class MainWindow extends JFrame {
      *
      * @return JComponent
      */
-    private JComponent buildConfigsRestrictionsPanel() {
-        JPanel panel = new JPanel(new BorderLayout());
-        panel.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY));
+    private JComponent buildConfigsConstraintsPanel() {
         JPanel labelPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         labelPanel.add(new JLabel("Restrições"));
+        //
+        //
+        //
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY));
         panel.add(labelPanel, BorderLayout.NORTH);
-        panel.add(buildNonNegativeValuesPanel());
+        panel.add(buildConstraintsTable(), BorderLayout.CENTER);
+//        panel.add(buildNonNegativeValuesPanel());;
         return panel;
     }
+    
+    /**
+     * Builds the variables table
+     *
+     * @return JComponent
+     */
+    private JComponent buildConstraintsTable() {
+        JPanel panel = new JPanel();
+        String[][] data = {{"", "", "", "", ""}, {"", "", "", "", ""}};
+        String[] cols = {"x1", "+", "x2", "+", "x2"};
+        JTable table = new JTable(data, cols);
+        table.setBorder(BorderFactory.createEmptyBorder());
+        JScrollPane sp = new JScrollPane(table);
+        sp.setBorder(BorderFactory.createEmptyBorder());
+        sp.setPreferredSize(new Dimension(300, 86));
+        panel.add(sp);
+        return panel;
+    }
+
     
     private JComponent buildNonNegativeValuesPanel() {
         return new JPanel();
