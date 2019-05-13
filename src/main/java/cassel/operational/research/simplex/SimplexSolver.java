@@ -67,6 +67,21 @@ public class SimplexSolver {
     }
 
     /**
+     * Returns {@code true} if the specified tableau is optimal
+     *
+     * @param tableau matrix to test optimality
+     * @return {@code true} if the specified tableau is optimal
+     */
+    public boolean isOptimal(double[][] tableau) {
+        for (int i = 0; i < tableau[TARGET_FUNCTION_ROW_WITHIN_TABLEAU].length; i++) {
+            if (tableau[TARGET_FUNCTION_ROW_WITHIN_TABLEAU][i] < 0) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
      *
      * @param tableau
      * @return

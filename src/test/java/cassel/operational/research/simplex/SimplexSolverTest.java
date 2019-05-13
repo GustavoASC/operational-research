@@ -84,4 +84,60 @@ public class SimplexSolverTest {
         assertArrayEquals(expected, solver.invertTargetFunctionSignal(tableau));
     }
 
+    @Test
+    public void testIsOptimalFourVariables() {
+        SimplexSolver solver = new SimplexSolver();
+        double[][] tableau = new double[][]{
+            new double[]{2.0, 1.0, 1.0, 14.0},
+        };
+        assertEquals(true, solver.isOptimal(tableau));
+    }
+
+    @Test
+    public void testIsOptimalOneVariable() {
+        SimplexSolver solver = new SimplexSolver();
+        double[][] tableau = new double[][]{
+            new double[]{2.0},
+        };
+        assertEquals(true, solver.isOptimal(tableau));
+    }
+
+    @Test
+    public void testIsOptimalOneVariableTwoRows() {
+        SimplexSolver solver = new SimplexSolver();
+        double[][] tableau = new double[][]{
+            new double[]{2.0},
+            new double[]{-5.0},
+        };
+        assertEquals(true, solver.isOptimal(tableau));
+    }
+
+    @Test
+    public void testIsNotOptimalFourVariables() {
+        SimplexSolver solver = new SimplexSolver();
+        double[][] tableau = new double[][]{
+            new double[]{2.0, -1.0, 1.0, 14.0},
+        };
+        assertEquals(false, solver.isOptimal(tableau));
+    }
+
+    @Test
+    public void testIsNotOptimalOneVariable() {
+        SimplexSolver solver = new SimplexSolver();
+        double[][] tableau = new double[][]{
+            new double[]{-2.0},
+        };
+        assertEquals(false, solver.isOptimal(tableau));
+    }
+
+    @Test
+    public void testIsNotOptimalOneVariableTwoRows() {
+        SimplexSolver solver = new SimplexSolver();
+        double[][] tableau = new double[][]{
+            new double[]{-2.0},
+            new double[]{3.0},
+        };
+        assertEquals(false, solver.isOptimal(tableau));
+    }
+
 }
