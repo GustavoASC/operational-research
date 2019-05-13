@@ -13,7 +13,8 @@ package cassel.operational.research.simplex;
 public class SimplexSolver {
 
     /**
-     * Row where target function variables are found within tableau matrix, starting from zero index
+     * Row where target function variables are found within tableau matrix,
+     * starting from zero index
      */
     private static final int TARGET_FUNCTION_ROW_WITHIN_TABLEAU = 0;
 
@@ -56,7 +57,7 @@ public class SimplexSolver {
     /**
      * Inverts the signal of every target function variable
      *
-     * @param tableau 
+     * @param tableau
      * @return
      */
     public double[][] invertTargetFunctionSignal(double[][] tableau) {
@@ -80,12 +81,14 @@ public class SimplexSolver {
         }
         return true;
     }
-    
+
     /**
-     * Returns the column index of largest value in tableau, which is the next pivot column.
+     * Returns the column index of largest value in tableau, which is the next
+     * pivot column.
      * <p>
-     * The row index is related to {@link SimplexSolver.TARGET_FUNCTION_ROW_WITHIN_TABLEAU} within tableau.
-     * 
+     * The row index is related to
+     * {@link SimplexSolver.TARGET_FUNCTION_ROW_WITHIN_TABLEAU} within tableau.
+     *
      * @param tableau tableau to find the largest value
      * @return largest value index within tableau
      */
@@ -100,6 +103,51 @@ public class SimplexSolver {
             }
         }
         return bestCollumnIndex;
+    }
+
+    /**
+     * Finds the most appropriate pivot row considering the specified tableau
+     * and pivot column.
+     * <p>
+     * The rule to choose the row is the one which has the smallest value,
+     * dividing the constraint equality by the coefficient of the variable in
+     * pivot column index.
+     *
+     * @param tableau simplex tableau
+     * @param pivotColumnIndex pivot column index
+     * @return most appropriate pivot row index
+     */
+    public int findPivotRowIndex(double[][] tableau, int pivotColumnIndex) {
+        int bestRowIndex = 0;
+        double smallestResult = Double.MAX_VALUE;
+        for (int i = 0; i < tableau.length; i++) {
+            double divisionResult = calculateDivisionForRow(tableau, i, pivotColumnIndex);
+            if (divisionResult <= smallestResult) {
+                bestRowIndex = i;
+                smallestResult = divisionResult;
+            }
+        }
+        return bestRowIndex;
+    }
+
+    /**
+     * Calculates the division for the specified row with the specified pivot
+     * column index.
+     * <p>
+     * This method divides the constraint equality by the coefficient of the
+     * variable in pivot column index.
+     * 
+     * @param tableau simplex tableau
+     * @param rowIndex row index within tableau
+     * @param columnIndex column index within tableau (pivot column)
+     * @return division result
+     */
+    public double calculateDivisionForRow(double[][] tableau, int rowIndex, int columnIndex) {
+        double pivotValue = tableau[rowIndex][columnIndex];
+        int rowLength = tableau[rowIndex].length;
+        double rowResult = tableau[rowIndex][rowLength - 1];
+        double divisionResult = pivotValue / rowResult;
+        return divisionResult;
     }
 
     /**

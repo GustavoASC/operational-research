@@ -176,4 +176,64 @@ public class SimplexSolverTest {
         assertEquals(0, solver.findPivotColumnIndex(tableau));
     }
 
+    @Test
+    public void testCalculateDivisionForSingleRow() {
+        SimplexSolver solver = new SimplexSolver();
+        double[][] tableau = new double[][]{
+            new double[]{8.0, 2.0},
+        };
+        assertEquals(4, solver.calculateDivisionForRow(tableau, 0, 0));
+    }
+
+    @Test
+    public void testCalculateDivisionForTwoRow() {
+        SimplexSolver solver = new SimplexSolver();
+        double[][] tableau = new double[][]{
+            new double[]{16.0, 5.0, 2.0},
+            new double[]{8.0, 20.0, 4.0},
+        };
+        assertEquals(2, solver.calculateDivisionForRow(tableau, 1, 0));
+    }
+
+    @Test
+    public void testCalculateDivisionForTwoRowFourColumns() {
+        SimplexSolver solver = new SimplexSolver();
+        double[][] tableau = new double[][]{
+            new double[]{16.0, 5.0, 30.0, 2.0},
+            new double[]{8.0, 20.0, 90.0, 4.0},
+        };
+        assertEquals(15, solver.calculateDivisionForRow(tableau, 0, 2));
+    }
+
+    @Test
+    public void testFindPivotRowIndex() {
+        SimplexSolver solver = new SimplexSolver();
+        double[][] tableau = new double[][]{
+            new double[]{16.0, 5.0, 30.0, 2.0},
+            new double[]{8.0, 20.0, 90.0, 4.0},
+        };
+        assertEquals(1, solver.findPivotRowIndex(tableau, 0));
+    }
+
+    @Test
+    public void testFindPivotRowIndexInvertedRows() {
+        SimplexSolver solver = new SimplexSolver();
+        double[][] tableau = new double[][]{
+            new double[]{8.0, 20.0, 90.0, 4.0},
+            new double[]{16.0, 5.0, 30.0, 2.0},
+        };
+        assertEquals(0, solver.findPivotRowIndex(tableau, 0));
+    }
+
+    @Test
+    public void testFindPivotRowIndexThreeRows() {
+        SimplexSolver solver = new SimplexSolver();
+        double[][] tableau = new double[][]{
+            new double[]{8.0, 20.0, 90.0, 4.0},
+            new double[]{30.0, 5.0, 30.0, 70.0},
+            new double[]{16.0, 5.0, 30.0, 2.0},
+        };
+        assertEquals(1, solver.findPivotRowIndex(tableau, 2));
+    }
+
 }
