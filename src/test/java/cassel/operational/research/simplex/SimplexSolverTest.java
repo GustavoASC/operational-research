@@ -140,4 +140,40 @@ public class SimplexSolverTest {
         assertEquals(false, solver.isOptimal(tableau));
     }
 
+    @Test
+    public void testFindLargestCoefficientWithinTableau() {
+        SimplexSolver solver = new SimplexSolver();
+        double[][] tableau = new double[][]{
+            new double[]{-2.0, -7.0, -1.5},
+        };
+        assertEquals(1, solver.findLargestCoefficientWithinTableau(tableau));
+    }
+
+    @Test
+    public void testFindLargestCoefficientWithinTableauAllPositive() {
+        SimplexSolver solver = new SimplexSolver();
+        double[][] tableau = new double[][]{
+            new double[]{2.0, 7.0, 1.5},
+        };
+        assertEquals(1, solver.findLargestCoefficientWithinTableau(tableau));
+    }
+
+    @Test
+    public void testFindLargestCoefficientWithinTableauThirdRow() {
+        SimplexSolver solver = new SimplexSolver();
+        double[][] tableau = new double[][]{
+            new double[]{2.0, 7.0, -25.5},
+        };
+        assertEquals(2, solver.findLargestCoefficientWithinTableau(tableau));
+    }
+
+    @Test
+    public void testFindLargestCoefficientWithinTableauFirstSingleRow() {
+        SimplexSolver solver = new SimplexSolver();
+        double[][] tableau = new double[][]{
+            new double[]{2.0},
+        };
+        assertEquals(0, solver.findLargestCoefficientWithinTableau(tableau));
+    }
+
 }

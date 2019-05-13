@@ -80,6 +80,27 @@ public class SimplexSolver {
         }
         return true;
     }
+    
+    /**
+     * Returns the column index of largest value in tableau.
+     * <p>
+     * The row index is related to {@link SimplexSolver.TARGET_FUNCTION_ROW_WITHIN_TABLEAU} within tableau.
+     * 
+     * @param tableau tableau to find the largest value
+     * @return largest value index within tableau
+     */
+    public int findLargestCoefficientWithinTableau(double[][] tableau) {
+        double largestValue = 0.0;
+        int bestCollumnIndex = 0;
+        for (int i = 0; i < tableau[TARGET_FUNCTION_ROW_WITHIN_TABLEAU].length; i++) {
+            double absoluteValue = Math.abs(tableau[TARGET_FUNCTION_ROW_WITHIN_TABLEAU][i]);
+            if (absoluteValue >= largestValue) {
+                largestValue = absoluteValue;
+                bestCollumnIndex = i;
+            }
+        }
+        return bestCollumnIndex;
+    }
 
     /**
      *
