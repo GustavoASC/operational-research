@@ -141,39 +141,39 @@ public class SimplexSolverTest {
     }
 
     @Test
-    public void testFindLargestCoefficientWithinTableau() {
+    public void testFindPivotColumnIndex() {
         SimplexSolver solver = new SimplexSolver();
         double[][] tableau = new double[][]{
             new double[]{-2.0, -7.0, -1.5},
         };
-        assertEquals(1, solver.findLargestCoefficientWithinTableau(tableau));
+        assertEquals(1, solver.findPivotColumnIndex(tableau));
     }
 
     @Test
-    public void testFindLargestCoefficientWithinTableauAllPositive() {
+    public void testFindPivotColumnIndexAllPositive() {
         SimplexSolver solver = new SimplexSolver();
         double[][] tableau = new double[][]{
             new double[]{2.0, 7.0, 1.5},
         };
-        assertEquals(1, solver.findLargestCoefficientWithinTableau(tableau));
+        assertEquals(1, solver.findPivotColumnIndex(tableau));
     }
 
     @Test
-    public void testFindLargestCoefficientWithinTableauThirdRow() {
+    public void testFindPivotColumnIndexThirdRow() {
         SimplexSolver solver = new SimplexSolver();
         double[][] tableau = new double[][]{
             new double[]{2.0, 7.0, -25.5},
         };
-        assertEquals(2, solver.findLargestCoefficientWithinTableau(tableau));
+        assertEquals(2, solver.findPivotColumnIndex(tableau));
     }
 
     @Test
-    public void testFindLargestCoefficientWithinTableauFirstSingleRow() {
+    public void testFindPivotColumnIndexFirstSingleRow() {
         SimplexSolver solver = new SimplexSolver();
         double[][] tableau = new double[][]{
             new double[]{2.0},
         };
-        assertEquals(0, solver.findLargestCoefficientWithinTableau(tableau));
+        assertEquals(0, solver.findPivotColumnIndex(tableau));
     }
 
 }

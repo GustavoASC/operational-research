@@ -82,14 +82,14 @@ public class SimplexSolver {
     }
     
     /**
-     * Returns the column index of largest value in tableau.
+     * Returns the column index of largest value in tableau, which is the next pivot column.
      * <p>
      * The row index is related to {@link SimplexSolver.TARGET_FUNCTION_ROW_WITHIN_TABLEAU} within tableau.
      * 
      * @param tableau tableau to find the largest value
      * @return largest value index within tableau
      */
-    public int findLargestCoefficientWithinTableau(double[][] tableau) {
+    public int findPivotColumnIndex(double[][] tableau) {
         double largestValue = 0.0;
         int bestCollumnIndex = 0;
         for (int i = 0; i < tableau[TARGET_FUNCTION_ROW_WITHIN_TABLEAU].length; i++) {
