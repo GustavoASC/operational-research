@@ -180,7 +180,7 @@ public class SimplexSolverTest {
     public void testCalculateDivisionForSingleRow() {
         SimplexSolver solver = new SimplexSolver();
         double[][] tableau = new double[][]{
-            new double[]{8.0, 2.0},
+            new double[]{2.0, 8.0},
         };
         assertEquals(4, solver.calculateDivisionForRow(tableau, 0, 0));
     }
@@ -189,8 +189,8 @@ public class SimplexSolverTest {
     public void testCalculateDivisionForTwoRow() {
         SimplexSolver solver = new SimplexSolver();
         double[][] tableau = new double[][]{
-            new double[]{16.0, 5.0, 2.0},
-            new double[]{8.0, 20.0, 4.0},
+            new double[]{2.0, 5.0, 16.0},
+            new double[]{4.0, 20.0, 8.0},
         };
         assertEquals(2, solver.calculateDivisionForRow(tableau, 1, 0));
     }
@@ -199,8 +199,8 @@ public class SimplexSolverTest {
     public void testCalculateDivisionForTwoRowFourColumns() {
         SimplexSolver solver = new SimplexSolver();
         double[][] tableau = new double[][]{
-            new double[]{16.0, 5.0, 30.0, 2.0},
-            new double[]{8.0, 20.0, 90.0, 4.0},
+            new double[]{16.0, 5.0, 2.0, 30.0},
+            new double[]{8.0, 20.0, 4.0, 90.0},
         };
         assertEquals(15, solver.calculateDivisionForRow(tableau, 0, 2));
     }
@@ -209,8 +209,8 @@ public class SimplexSolverTest {
     public void testFindPivotRowIndex() {
         SimplexSolver solver = new SimplexSolver();
         double[][] tableau = new double[][]{
-            new double[]{16.0, 5.0, 30.0, 2.0},
-            new double[]{8.0, 20.0, 90.0, 4.0},
+            new double[]{2.0, 5.0, 30.0, 16.0},
+            new double[]{4.0, 20.0, 90.0, 8.0},
         };
         assertEquals(1, solver.findPivotRowIndex(tableau, 0));
     }
@@ -219,8 +219,8 @@ public class SimplexSolverTest {
     public void testFindPivotRowIndexInvertedRows() {
         SimplexSolver solver = new SimplexSolver();
         double[][] tableau = new double[][]{
-            new double[]{8.0, 20.0, 90.0, 4.0},
-            new double[]{16.0, 5.0, 30.0, 2.0},
+            new double[]{4.0, 20.0, 90.0, 8.0},
+            new double[]{2.0, 5.0, 30.0, 16.0},
         };
         assertEquals(0, solver.findPivotRowIndex(tableau, 0));
     }
@@ -229,9 +229,9 @@ public class SimplexSolverTest {
     public void testFindPivotRowIndexThreeRows() {
         SimplexSolver solver = new SimplexSolver();
         double[][] tableau = new double[][]{
-            new double[]{8.0, 20.0, 90.0, 4.0},
-            new double[]{30.0, 5.0, 30.0, 70.0},
-            new double[]{16.0, 5.0, 30.0, 2.0},
+            new double[]{8.0, 20.0, 4.0, 90.0},
+            new double[]{30.0, 5.0, 70.0, 30.0},
+            new double[]{16.0, 5.0, 2.0, 30.0},
         };
         assertEquals(1, solver.findPivotRowIndex(tableau, 2));
     }

@@ -146,7 +146,7 @@ public class SimplexSolver {
         double pivotValue = tableau[rowIndex][columnIndex];
         int rowLength = tableau[rowIndex].length;
         double rowResult = tableau[rowIndex][rowLength - 1];
-        double divisionResult = pivotValue / rowResult;
+        double divisionResult = rowResult / pivotValue;
         return divisionResult;
     }
 
