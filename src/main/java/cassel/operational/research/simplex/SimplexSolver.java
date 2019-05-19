@@ -5,6 +5,9 @@
  */
 package cassel.operational.research.simplex;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+
 /**
  * Class to solve Linear Problems with Simplex algorithm.
  *
@@ -21,11 +24,17 @@ public class SimplexSolver {
     /**
      *
      * @param tableau
-     * @return resolved simplex tableau
      */
-    public double[][] solve(double[][] tableau) {
-        printTableau(tableau);
-        return tableau;
+    public void solve(double[][] tableau) {
+        tableau = addSlackVariables(tableau);
+        while (true) {
+            if (isOptimal(tableau)) {
+                break;
+            }
+            int pivotColumn = findPivotColumnIndex(tableau);
+            int pivotRow = findPivotRowIndex(tableau, pivotColumn);
+            tableau = createTableauFromPivot(tableau, pivotRow, pivotColumn);
+        }
     }
 
     /**
@@ -136,7 +145,7 @@ public class SimplexSolver {
      * <p>
      * This method divides the constraint equality by the coefficient of the
      * variable in pivot column index.
-     * 
+     *
      * @param tableau simplex tableau
      * @param rowIndex row index within tableau
      * @param columnIndex column index within tableau (pivot column)
@@ -148,6 +157,66 @@ public class SimplexSolver {
         double rowResult = tableau[rowIndex][rowLength - 1];
         double divisionResult = rowResult / pivotValue;
         return divisionResult;
+    }
+
+    /**
+     * Creates a new tableau from the specified pivot column and row
+     *
+     * @param tableau
+     * @param pivotRowIndex
+     * @param pivotColumnIndex
+     * @return
+     */
+    public double[][] createTableauFromPivot(double[][] tableau, int pivotRowIndex, int pivotColumnIndex) {
+        // Creates the new and empty tableau
+        double[][] newTableau = new double[tableau.length][];
+        for (int i = 0; i < tableau.length; i++) {
+            newTableau[i] = new double[tableau[i].length];
+        }
+        // Divides every value of the pivot row from the pivot value
+        double[] pivotRow   = tableau[pivotRowIndex];
+        double   pivotValue = pivotRow[pivotColumnIndex];
+        for (int i = 0; i < pivotRow.length; i++) {
+            double currentPivotRowValue = pivotRow[i];
+            newTableau[pivotRowIndex][i] = currentPivotRowValue / pivotValue;
+        }
+        //
+        // Now, calculates the value of remaining tableau variables 
+        //
+        // The rule is:
+        //    - New tableau value = (Negative value in old tableau pivot column) * (value in new tableau pivot row) + (Old tableau value)
+        for (int i = 0; i < tableau.length; i++) {
+            for (int j = 0; j < tableau[i].length; j++) {
+                // Checks if variable hasn't been modified yet by the
+                // operations above
+                if (i != pivotRowIndex && j != pivotColumnIndex) {
+                    BigDecimal negativeValueOldTableauPivotColumn = new BigDecimal(tableau[i][pivotColumnIndex] * -1).setScale(2, RoundingMode.HALF_EVEN);
+                    BigDecimal valueNewTableauPivotRow = new BigDecimal(newTableau[pivotRowIndex][j]).setScale(2, RoundingMode.HALF_EVEN);
+                    BigDecimal oldTableauValue = new BigDecimal(tableau[i][j]).setScale(2, RoundingMode.HALF_EVEN);
+                    BigDecimal firstResult = negativeValueOldTableauPivotColumn.multiply(valueNewTableauPivotRow);
+                    BigDecimal newValue = firstResult.add(oldTableauValue);
+                    newTableau[i][j] = newValue.doubleValue();
+                }
+            }
+        }
+        printTableau(newTableau);
+        return newTableau;
+    }
+
+    /**
+     * Returns a new array representing each value of the original
+     * {@code pivotRow} divided by the {@code pivotValue}
+     *
+     * @param pivotRow original pivot row
+     * @param pivotValue value to divide each pivot row value by
+     * @return the new modified pivot row
+     */
+    private double[] divideWholeRowBy(double[] pivotRow, double pivotValue) {
+        double[] newPivotRow = new double[pivotRow.length];
+        for (int i = 0; i < pivotRow.length; i++) {
+            newPivotRow[i] = pivotRow[i] / pivotValue;
+        }
+        return newPivotRow;
     }
 
     /**

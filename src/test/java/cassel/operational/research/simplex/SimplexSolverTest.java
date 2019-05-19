@@ -10,13 +10,13 @@ import org.junit.jupiter.api.Test;
 
 public class SimplexSolverTest {
 
-    @Test
-    public void testSolve() {
-        SimplexSolver solver = new SimplexSolver();
-        double[][] tableau = new double[0][0];
-        double[][] expected = new double[0][0];
-        assertArrayEquals(expected, solver.solve(tableau));
-    }
+//    @Test
+//    public void testSolve() {
+//        SimplexSolver solver = new SimplexSolver();
+//        double[][] tableau = new double[0][0];
+//        double[][] expected = new double[0][0];
+//        assertArrayEquals(expected, solver.solve(tableau));
+//    }
 
     @Test
     public void testAddSlackVariablesSingleSmallRow() {
@@ -234,6 +234,23 @@ public class SimplexSolverTest {
             new double[]{16.0, 5.0, 2.0, 30.0},
         };
         assertEquals(1, solver.findPivotRowIndex(tableau, 2));
+    }
+    
+
+    @Test
+    public void testCreateTableauFromPivot() {
+        SimplexSolver solver = new SimplexSolver();
+        double[][] tableau = new double[][]{
+            new double[]{ 1.0,   3.0,  2.0, 1.0,  0.0, 0.0, 10.0},
+            new double[]{ 1.0,   5.0,  1.0, 0.0,  1.0, 0.0,  8.0},
+            new double[]{-8.0, -10.0, -7.0, 0.0,  0.0, 1.0,  0.0},
+        };
+        double[][] expected = new double[][]{
+            new double[]{ 0.4,   0.0,  1.4, 1.0, -0.6, 0.0,  5.2},
+            new double[]{ 0.2,   1.0,  0.2, 0.0,  0.2, 0.0,  1.6},
+            new double[]{-6.0,   0.0, -5.0, 0.0,  2.0, 1.0, 16.0},
+        };
+        assertArrayEquals(expected, solver.createTableauFromPivot(tableau, 1, 1));
     }
 
 }
