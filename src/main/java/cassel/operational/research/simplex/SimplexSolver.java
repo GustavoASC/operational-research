@@ -7,7 +7,6 @@ package cassel.operational.research.simplex;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.text.DecimalFormat;
 
 /**
  * Class to solve Linear Problems with Simplex algorithm.
@@ -27,9 +26,11 @@ public class SimplexSolver {
      * @param tableau
      */
     public void solve(double[][] tableau) {
+        int iteration = 0;
         tableau = addSlackVariables(tableau);
         while (!isOptimal(tableau)) {
-            printTableau(tableau);
+            iteration++;
+            printTableau(tableau, iteration);
             int pivotColumn = findPivotColumnIndex(tableau);
             int pivotRow = findPivotRowIndex(tableau, pivotColumn);
             tableau = createTableauFromPivot(tableau, pivotRow, pivotColumn);
@@ -242,32 +243,33 @@ public class SimplexSolver {
                 }
             }
         }
-        printTableau(newTableau);
         return newTableau;
     }
 
     /**
-     *
-     * @param tableau
-     * @return
+     * Prints the specified tableau
+     * 
+     * @param tableau tableau to be printed
+     * @param interation iteration number 
      */
-    public double[][] solveNextStep(double[][] tableau) {
-        printTableau(tableau);
-        return tableau;
-    }
-
-    private void printTableau(double[][] tableau) {
-        DecimalFormat df = new DecimalFormat("###,##0.00");
+    private void printTableau(double[][] tableau, int iteration) {
+        System.out.println("Tableau in iteration " + iteration + ":");
         for (int i = 0; i < tableau.length; i++) {
-            System.out.println("+---------------------------------------------------------+");
-            System.out.print("| ");
+            System.out.print("+");
+            System.out.print("-".repeat(8 * (tableau[i].length - 1)));
+            System.out.print("+");
+            System.out.println();
+            System.out.print("|");
             for (int j = 0; j < tableau[i].length; j++) {
-                String formatted = df.format(tableau[i][j]);
-                System.out.print(formatted + " | ");
+                String formatted = String.format("%6.2f", tableau[i][j]);
+                System.out.print(formatted + "|");
             }
             System.out.println();
         }
-        System.out.println("+---------------------------------------------------------+");
+        System.out.print("+");
+        System.out.print("-".repeat(8 * (tableau[0].length - 1)));
+        System.out.print("+");
+        System.out.println();
     }
 
 }
