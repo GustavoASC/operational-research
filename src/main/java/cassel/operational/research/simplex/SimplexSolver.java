@@ -256,7 +256,7 @@ public class SimplexSolver {
         System.out.println("Tableau in iteration " + iteration + ":");
         for (int i = 0; i < tableau.length; i++) {
             System.out.print("+");
-            System.out.print("-".repeat(8 * (tableau[i].length - 1)));
+            System.out.print(repeat("-", (8 * (tableau[0].length - 1))));
             System.out.print("+");
             System.out.println();
             System.out.print("|");
@@ -267,9 +267,24 @@ public class SimplexSolver {
             System.out.println();
         }
         System.out.print("+");
-        System.out.print("-".repeat(8 * (tableau[0].length - 1)));
+        System.out.print(repeat("-", (8 * (tableau[0].length - 1))));
         System.out.print("+");
         System.out.println();
     }
-
+    
+    
+    /**
+     * Repeats the specified {@code string} {@code repeatTimes} times
+     * 
+     * @param target string to be repeated
+     * @param repeatTimes number of repetitions
+     * @return repeated String
+     */
+    private String repeat(String target, int repeatTimes) {
+        StringBuilder repeated = new StringBuilder();
+        for (int i = 0; i < repeatTimes; i++) {
+            repeated.append(target);
+        }
+        return repeated.toString();
+    }
 }
