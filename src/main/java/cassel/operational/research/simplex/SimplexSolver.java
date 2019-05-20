@@ -7,6 +7,7 @@ package cassel.operational.research.simplex;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.text.DecimalFormat;
 
 /**
  * Class to solve Linear Problems with Simplex algorithm.
@@ -27,10 +28,8 @@ public class SimplexSolver {
      */
     public void solve(double[][] tableau) {
         tableau = addSlackVariables(tableau);
-        while (true) {
-            if (isOptimal(tableau)) {
-                break;
-            }
+        while (!isOptimal(tableau)) {
+            printTableau(tableau);
             int pivotColumn = findPivotColumnIndex(tableau);
             int pivotRow = findPivotRowIndex(tableau, pivotColumn);
             tableau = createTableauFromPivot(tableau, pivotRow, pivotColumn);
@@ -54,13 +53,37 @@ public class SimplexSolver {
             double[] rowWithSlack = new double[currentOriginalTableauRow.length + totalSlackVariables];
             // Clones the original tableau variables to the new array
             // For now the value of slack variables are ignored and keep zero
-            System.arraycopy(currentOriginalTableauRow, 0, rowWithSlack, 0, currentOriginalTableauRow.length);
+            for (int j = 0; j < currentOriginalTableauRow.length; j++) {
+                // The constraint equality is not copied yet because it will 
+                // be copied after the slack variable is inserted
+                if (j != getConstraintEqualityIndex(currentOriginalTableauRow)) {
+                    rowWithSlack[j] = currentOriginalTableauRow[j];
+                }
+            }
             // Specifies the value of the slack variable for the current row
-            rowWithSlack[currentOriginalTableauRow.length + i] = 1.0;
+            int slackVariableIndex = calculateSlackIndex(currentOriginalTableauRow, i);
+            rowWithSlack[slackVariableIndex] = 1.0;
+            // Reinserts the constraint equality value
+            rowWithSlack[getConstraintEqualityIndex(rowWithSlack)] = getConstraintEqualityValue(currentOriginalTableauRow);
             // Adds the new row to the new tableau matrix
             tableauWithSlacks[i] = rowWithSlack;
         }
         return tableauWithSlacks;
+    }
+    
+    /**
+     * Calculates the index in which the slack variable should be inserted
+     * 
+     * @param row row array
+     * @param slackNumber number of the slack variable to be inserted
+     * (1, 2, 3...)
+     * @return the slack index
+     */
+    private int calculateSlackIndex(double[] row, int slackNumber) {
+        int constraintIndex = getConstraintEqualityIndex(row);
+        int constraintFromEnd = row.length - constraintIndex;
+        int slackIndexWithinRow = row.length + slackNumber - constraintFromEnd;
+        return slackIndexWithinRow;
     }
 
     /**
@@ -153,10 +176,30 @@ public class SimplexSolver {
      */
     public double calculateDivisionForRow(double[][] tableau, int rowIndex, int columnIndex) {
         double pivotValue = tableau[rowIndex][columnIndex];
-        int rowLength = tableau[rowIndex].length;
-        double rowResult = tableau[rowIndex][rowLength - 1];
+        double rowResult = getConstraintEqualityValue(tableau[rowIndex]);
         double divisionResult = rowResult / pivotValue;
         return divisionResult;
+    }
+    
+    /**
+     * Returns the value of the constraint for the specified row
+     * 
+     * @param row row values
+     * @return constraint equality value
+     */
+    private double getConstraintEqualityValue(double[] row) {
+        int index = getConstraintEqualityIndex(row);
+        return row[index];
+    }
+    
+    /**
+     * Returns the index of the constraint for the specified row
+     * 
+     * @param row row values
+     * @return constraint equality value
+     */
+    private int getConstraintEqualityIndex(double[] row) {
+        return row.length - 1;
     }
 
     /**
@@ -204,22 +247,6 @@ public class SimplexSolver {
     }
 
     /**
-     * Returns a new array representing each value of the original
-     * {@code pivotRow} divided by the {@code pivotValue}
-     *
-     * @param pivotRow original pivot row
-     * @param pivotValue value to divide each pivot row value by
-     * @return the new modified pivot row
-     */
-    private double[] divideWholeRowBy(double[] pivotRow, double pivotValue) {
-        double[] newPivotRow = new double[pivotRow.length];
-        for (int i = 0; i < pivotRow.length; i++) {
-            newPivotRow[i] = pivotRow[i] / pivotValue;
-        }
-        return newPivotRow;
-    }
-
-    /**
      *
      * @param tableau
      * @return
@@ -230,12 +257,17 @@ public class SimplexSolver {
     }
 
     private void printTableau(double[][] tableau) {
+        DecimalFormat df = new DecimalFormat("###,##0.00");
         for (int i = 0; i < tableau.length; i++) {
+            System.out.println("+---------------------------------------------------------+");
+            System.out.print("| ");
             for (int j = 0; j < tableau[i].length; j++) {
-                System.out.print(tableau[i][j] + " | ");
+                String formatted = df.format(tableau[i][j]);
+                System.out.print(formatted + " | ");
             }
             System.out.println();
         }
+        System.out.println("+---------------------------------------------------------+");
     }
 
 }

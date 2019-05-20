@@ -22,10 +22,22 @@ public class SimplexSolverTest {
     public void testAddSlackVariablesSingleSmallRow() {
         SimplexSolver solver = new SimplexSolver();
         double[][] tableau = new double[][]{
+            new double[]{1.5, 2.0},
+        };
+        double[][] expected = new double[][]{
+            new double[]{1.5, 1.0, 2.0},
+        };
+        assertArrayEquals(expected, solver.addSlackVariables(tableau));
+    }
+
+    @Test
+    public void testAddSlackVariablesSingleRowOneElement() {
+        SimplexSolver solver = new SimplexSolver();
+        double[][] tableau = new double[][]{
             new double[]{2.0},
         };
         double[][] expected = new double[][]{
-            new double[]{2.0, 1.0},
+            new double[]{1.0, 2.0},
         };
         assertArrayEquals(expected, solver.addSlackVariables(tableau));
     }
@@ -37,7 +49,7 @@ public class SimplexSolverTest {
             new double[]{2.0, 1.0, 1.0, 14.0},
         };
         double[][] expected = new double[][]{
-            new double[]{2.0, 1.0, 1.0, 14.0, 1.0},
+            new double[]{2.0, 1.0, 1.0, 1.0, 14.0},
         };
         assertArrayEquals(expected, solver.addSlackVariables(tableau));
     }
@@ -50,8 +62,8 @@ public class SimplexSolverTest {
             new double[]{4.0, 2.0, 3.0, 28.0},
         };
         double[][] expected = new double[][]{
-            new double[]{2.0, 1.0, 1.0, 14.0, 1.0, 0.0},
-            new double[]{4.0, 2.0, 3.0, 28.0, 0.0, 1.0},
+            new double[]{2.0, 1.0, 1.0, 1.0, 0.0, 14.0},
+            new double[]{4.0, 2.0, 3.0, 0.0, 1.0, 28.0},
         };
         assertArrayEquals(expected, solver.addSlackVariables(tableau));
     }
@@ -65,9 +77,9 @@ public class SimplexSolverTest {
             new double[]{2.0, 5.0, 5.0, 30.0},
         };
         double[][] expected = new double[][]{
-            new double[]{2.0, 1.0, 1.0, 14.0, 1.0, 0.0, 0.0},
-            new double[]{4.0, 2.0, 3.0, 28.0, 0.0, 1.0, 0.0},
-            new double[]{2.0, 5.0, 5.0, 30.0, 0.0, 0.0, 1.0},
+            new double[]{2.0, 1.0, 1.0, 1.0, 0.0, 0.0, 14.0},
+            new double[]{4.0, 2.0, 3.0, 0.0, 1.0, 0.0, 28.0},
+            new double[]{2.0, 5.0, 5.0, 0.0, 0.0, 1.0, 30.0},
         };
         assertArrayEquals(expected, solver.addSlackVariables(tableau));
     }

@@ -5,6 +5,8 @@
  */
 package cassel.operational.research;
 
+import cassel.operational.research.simplex.SimplexSolver;
+
 /**
  * Starts the operational research application
  *
@@ -13,7 +15,14 @@ package cassel.operational.research;
 public class Starter {
 
     public static void main(String[] args) {
-        new MainWindow().setVisible(true);
+//        new MainWindow().setVisible(true);
+        SimplexSolver solver = new SimplexSolver();
+        double[][] tableau = new double[][]{
+            new double[]{-8.0, -10.0, -7.0,  0.0},
+            new double[]{ 1.0,   3.0,  2.0, 10.0},
+            new double[]{ 1.0,   5.0,  1.0,  8.0},
+        };
+        solver.solve(tableau);
     }
 
 }
