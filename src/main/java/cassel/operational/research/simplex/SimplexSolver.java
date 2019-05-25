@@ -35,6 +35,8 @@ public class SimplexSolver {
             int pivotRow = findPivotRowIndex(tableau, pivotColumn);
             tableau = createTableauFromPivot(tableau, pivotRow, pivotColumn);
         }
+        iteration++;
+        printTableau(tableau, iteration);
     }
 
     /**
@@ -153,7 +155,7 @@ public class SimplexSolver {
     public int findPivotRowIndex(double[][] tableau, int pivotColumnIndex) {
         int bestRowIndex = 0;
         double smallestResult = Double.MAX_VALUE;
-        for (int i = 0; i < tableau.length; i++) {
+        for (int i = 1; i < tableau.length; i++) {
             double divisionResult = calculateDivisionForRow(tableau, i, pivotColumnIndex);
             if (divisionResult <= smallestResult) {
                 bestRowIndex = i;
@@ -254,9 +256,24 @@ public class SimplexSolver {
      */
     private void printTableau(double[][] tableau, int iteration) {
         System.out.println("Tableau in iteration " + iteration + ":");
+        System.out.print("+");
+        System.out.print(repeat("-", (8 * (tableau[0].length)) - 1));
+        System.out.print("+");
+        System.out.println("");
+        System.out.print("|");
+        for (int i = 0; i < tableau[0].length - 1; i++) {
+            System.out.print("    x" + i);
+            System.out.print("|");
+        }
+        System.out.print("Vlr.Co");
+        System.out.print("|");
+        System.out.print(" Linha|");
+        System.out.println("");
+        System.out.print("|");
+        
         for (int i = 0; i < tableau.length; i++) {
             System.out.print("+");
-            System.out.print(repeat("-", (8 * (tableau[0].length - 1))));
+            System.out.print(repeat("-", (8 * (tableau[0].length)) - 1));
             System.out.print("+");
             System.out.println();
             System.out.print("|");
@@ -264,10 +281,12 @@ public class SimplexSolver {
                 String formatted = String.format("%6.2f", tableau[i][j]);
                 System.out.print(formatted + "|");
             }
+            System.out.print(String.format("%6d", i));
+            System.out.print("|");
             System.out.println();
         }
         System.out.print("+");
-        System.out.print(repeat("-", (8 * (tableau[0].length - 1))));
+        System.out.print(repeat("-", (8 * (tableau[0].length)) - 1));
         System.out.print("+");
         System.out.println();
     }

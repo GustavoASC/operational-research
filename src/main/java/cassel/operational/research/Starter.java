@@ -18,9 +18,10 @@ public class Starter {
 //        new MainWindow().setVisible(true);
         SimplexSolver solver = new SimplexSolver();
         double[][] tableau = new double[][]{
-            new double[]{-8.0, -10.0, -7.0,  0.0},
-            new double[]{ 1.0,   3.0,  2.0, 10.0},
-            new double[]{ 1.0,   5.0,  1.0,  8.0},
+            new double[]{-5.0, -6.0, 0.0},
+            new double[]{ 0.2,  0.3, 1.8},
+            new double[]{ 0.2,  0.1, 1.2},
+            new double[]{ 0.3,  0.3, 2.4},
         };
         solver.solve(tableau);
     }

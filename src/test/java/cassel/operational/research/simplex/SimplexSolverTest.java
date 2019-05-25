@@ -234,7 +234,7 @@ public class SimplexSolverTest {
             new double[]{4.0, 20.0, 90.0, 8.0},
             new double[]{2.0, 5.0, 30.0, 16.0},
         };
-        assertEquals(0, solver.findPivotRowIndex(tableau, 0));
+        assertEquals(1, solver.findPivotRowIndex(tableau, 0));
     }
 
     @Test
