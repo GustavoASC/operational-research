@@ -6,6 +6,9 @@
 package cassel.operational.research;
 
 import cassel.operational.research.simplex.SimplexSolver;
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Starts the operational research application
@@ -15,14 +18,22 @@ import cassel.operational.research.simplex.SimplexSolver;
 public class Starter {
 
     public static void main(String[] args) {
-//        new MainWindow().setVisible(true);
-        SimplexSolver solver = new SimplexSolver();
         double[][] tableau = new double[][]{
             new double[]{-5.0, -6.0, 0.0},
             new double[]{ 0.2,  0.3, 1.8},
             new double[]{ 0.2,  0.1, 1.2},
             new double[]{ 0.3,  0.3, 2.4},
         };
+        if (args.length > 0) {
+            String filename = args[0];
+            try {
+                tableau = new TableauFileReader().readFromFile(filename);
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        }
+//        new MainWindow().setVisible(true);
+        SimplexSolver solver = new SimplexSolver();
         solver.solve(tableau);
     }
 

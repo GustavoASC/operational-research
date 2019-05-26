@@ -38,6 +38,7 @@ public class SimplexSolver {
         }
         iteration++;
         printTableau(tableau, iteration);
+        System.out.println("SIMPLEX finalizado.");
     }
 
     /**
