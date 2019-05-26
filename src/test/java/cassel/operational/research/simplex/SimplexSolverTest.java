@@ -34,10 +34,10 @@ public class SimplexSolverTest {
     public void testAddSlackVariablesSingleRowOneElement() {
         SimplexSolver solver = new SimplexSolver();
         double[][] tableau = new double[][]{
-            new double[]{2.0},
+            new double[]{2.0, 0.0, 0.0},
         };
         double[][] expected = new double[][]{
-            new double[]{1.0, 2.0},
+            new double[]{1.0, 2.0, 0.0, 0.0},
         };
         assertArrayEquals(expected, solver.addSlackVariables(tableau));
     }
@@ -46,10 +46,10 @@ public class SimplexSolverTest {
     public void testAddSlackVariablesSingleRow() {
         SimplexSolver solver = new SimplexSolver();
         double[][] tableau = new double[][]{
-            new double[]{2.0, 1.0, 1.0, 14.0},
+            new double[]{2.0, 1.0, 1.0, 14.0, 0.0},
         };
         double[][] expected = new double[][]{
-            new double[]{1.0, 2.0, 1.0, 1.0, 14.0},
+            new double[]{1.0, 2.0, 1.0, 1.0, 14.0, 0.0},
         };
         assertArrayEquals(expected, solver.addSlackVariables(tableau));
     }
@@ -58,12 +58,12 @@ public class SimplexSolverTest {
     public void testAddSlackVariablesTwoRows() {
         SimplexSolver solver = new SimplexSolver();
         double[][] tableau = new double[][]{
-            new double[]{2.0, 1.0, 1.0, 14.0},
-            new double[]{4.0, 2.0, 3.0, 28.0},
+            new double[]{2.0, 1.0, 1.0, 14.0, 0.0},
+            new double[]{4.0, 2.0, 3.0, 28.0, 0.0},
         };
         double[][] expected = new double[][]{
-            new double[]{1.0, 2.0, 1.0, 1.0, 0.0, 14.0},
-            new double[]{0.0, 4.0, 2.0, 3.0, 1.0, 28.0},
+            new double[]{1.0, 2.0, 1.0, 1.0, 0.0, 14.0, 0.0},
+            new double[]{0.0, 4.0, 2.0, 3.0, 1.0, 28.0, 0.0},
         };
         assertArrayEquals(expected, solver.addSlackVariables(tableau));
     }
@@ -72,16 +72,32 @@ public class SimplexSolverTest {
     public void testAddSlackVariablesThreeRows() {
         SimplexSolver solver = new SimplexSolver();
         double[][] tableau = new double[][]{
+            new double[]{2.0, 1.0, 1.0, 14.0, 0.0},
+            new double[]{4.0, 2.0, 3.0, 28.0, 0.0},
+            new double[]{2.0, 5.0, 5.0, 30.0, 0.0},
+        };
+        double[][] expected = new double[][]{
+            new double[]{1.0, 2.0, 1.0, 1.0, 0.0, 0.0, 14.0, 0.0},
+            new double[]{0.0, 4.0, 2.0, 3.0, 1.0, 0.0, 28.0, 0.0},
+            new double[]{0.0, 2.0, 5.0, 5.0, 0.0, 1.0, 30.0, 0.0},
+        };
+        assertArrayEquals(expected, solver.addSlackVariables(tableau));
+    }
+
+    @Test
+    public void testAddDivisionResultColumn() {
+        SimplexSolver solver = new SimplexSolver();
+        double[][] tableau = new double[][]{
             new double[]{2.0, 1.0, 1.0, 14.0},
             new double[]{4.0, 2.0, 3.0, 28.0},
             new double[]{2.0, 5.0, 5.0, 30.0},
         };
         double[][] expected = new double[][]{
-            new double[]{1.0, 2.0, 1.0, 1.0, 0.0, 0.0, 14.0},
-            new double[]{0.0, 4.0, 2.0, 3.0, 1.0, 0.0, 28.0},
-            new double[]{0.0, 2.0, 5.0, 5.0, 0.0, 1.0, 30.0},
+            new double[]{2.0, 1.0, 1.0, 14.0, 0.0},
+            new double[]{4.0, 2.0, 3.0, 28.0, 0.0},
+            new double[]{2.0, 5.0, 5.0, 30.0, 0.0},
         };
-        assertArrayEquals(expected, solver.addSlackVariables(tableau));
+        assertArrayEquals(expected, solver.addDivisionResultColumn(tableau));
     }
 
     @Test
@@ -109,7 +125,7 @@ public class SimplexSolverTest {
     public void testIsOptimalOneVariable() {
         SimplexSolver solver = new SimplexSolver();
         double[][] tableau = new double[][]{
-            new double[]{2.0},
+            new double[]{2.0, 0.0},
         };
         assertEquals(true, solver.isOptimal(tableau));
     }
@@ -128,7 +144,7 @@ public class SimplexSolverTest {
     public void testIsNotOptimalFourVariables() {
         SimplexSolver solver = new SimplexSolver();
         double[][] tableau = new double[][]{
-            new double[]{2.0, -1.0, 1.0, 14.0},
+            new double[]{2.0, -1.0, 1.0, 14.0, 0.0},
         };
         assertEquals(false, solver.isOptimal(tableau));
     }
@@ -137,7 +153,7 @@ public class SimplexSolverTest {
     public void testIsNotOptimalOneVariable() {
         SimplexSolver solver = new SimplexSolver();
         double[][] tableau = new double[][]{
-            new double[]{-2.0},
+            new double[]{-2.0, 0.0, 0.0},
         };
         assertEquals(false, solver.isOptimal(tableau));
     }
@@ -146,8 +162,8 @@ public class SimplexSolverTest {
     public void testIsNotOptimalOneVariableTwoRows() {
         SimplexSolver solver = new SimplexSolver();
         double[][] tableau = new double[][]{
-            new double[]{-2.0},
-            new double[]{3.0},
+            new double[]{-2.0, 0.0, 0.0},
+            new double[]{3.0, 0.0, 0.0},
         };
         assertEquals(false, solver.isOptimal(tableau));
     }
@@ -156,7 +172,7 @@ public class SimplexSolverTest {
     public void testFindPivotColumnIndex() {
         SimplexSolver solver = new SimplexSolver();
         double[][] tableau = new double[][]{
-            new double[]{-2.0, -7.0, -1.5},
+            new double[]{-2.0, -7.0, -1.5, 0.0},
         };
         assertEquals(1, solver.findPivotColumnIndex(tableau));
     }
@@ -192,7 +208,7 @@ public class SimplexSolverTest {
     public void testFindPivotColumnIndexFirstSingleRow() {
         SimplexSolver solver = new SimplexSolver();
         double[][] tableau = new double[][]{
-            new double[]{2.0},
+            new double[]{2.0, 0.0, 0.0},
         };
         assertEquals(0, solver.findPivotColumnIndex(tableau));
     }
@@ -201,7 +217,7 @@ public class SimplexSolverTest {
     public void testCalculateDivisionForSingleRow() {
         SimplexSolver solver = new SimplexSolver();
         double[][] tableau = new double[][]{
-            new double[]{2.0, 8.0},
+            new double[]{2.0, 8.0, 0.0},
         };
         assertEquals(4, solver.calculateDivisionForRow(tableau, 0, 0));
     }
@@ -210,8 +226,8 @@ public class SimplexSolverTest {
     public void testCalculateDivisionForTwoRow() {
         SimplexSolver solver = new SimplexSolver();
         double[][] tableau = new double[][]{
-            new double[]{2.0, 5.0, 16.0},
-            new double[]{4.0, 20.0, 8.0},
+            new double[]{2.0, 5.0, 16.0, 0.0},
+            new double[]{4.0, 20.0, 8.0, 0.0},
         };
         assertEquals(2, solver.calculateDivisionForRow(tableau, 1, 0));
     }
@@ -220,8 +236,8 @@ public class SimplexSolverTest {
     public void testCalculateDivisionForTwoRowFourColumns() {
         SimplexSolver solver = new SimplexSolver();
         double[][] tableau = new double[][]{
-            new double[]{16.0, 5.0, 2.0, 30.0},
-            new double[]{8.0, 20.0, 4.0, 90.0},
+            new double[]{16.0, 5.0, 2.0, 30.0, 0.0},
+            new double[]{8.0, 20.0, 4.0, 90.0, 0.0},
         };
         assertEquals(15, solver.calculateDivisionForRow(tableau, 0, 2));
     }
@@ -250,9 +266,9 @@ public class SimplexSolverTest {
     public void testFindPivotRowIndexThreeRows() {
         SimplexSolver solver = new SimplexSolver();
         double[][] tableau = new double[][]{
-            new double[]{8.0, 20.0, 4.0, 90.0},
-            new double[]{30.0, 5.0, 70.0, 30.0},
-            new double[]{16.0, 5.0, 2.0, 30.0},
+            new double[]{8.0, 20.0, 4.0, 90.0, 0.0},
+            new double[]{30.0, 5.0, 70.0, 30.0, 5.0},
+            new double[]{16.0, 5.0, 2.0, 30.0, 9.0},
         };
         assertEquals(1, solver.findPivotRowIndex(tableau, 2));
     }
@@ -266,9 +282,9 @@ public class SimplexSolverTest {
             new double[]{-8.0, -10.0, -7.0, 0.0,  0.0, 1.0,  0.0},
         };
         double[][] expected = new double[][]{
-            new double[]{ 0.4,   0.0,  1.4, 1.0, -0.6, 0.0,  5.2},
-            new double[]{ 0.2,   1.0,  0.2, 0.0,  0.2, 0.0,  1.6},
-            new double[]{-6.0,   0.0, -5.0, 0.0,  2.0, 1.0, 16.0},
+            new double[]{ 0.4,   0.0,  1.4, 1.0, -0.6, 0.0,  0.0},
+            new double[]{ 0.2,   1.0,  0.2, 0.0,  0.2, 0.0,  0.0},
+            new double[]{-6.0,   0.0, -5.0, 0.0,  2.0, 1.0,  0.0},
         };
         assertArrayEquals(expected, solver.createTableauFromPivot(tableau, 1, 1));
     }
@@ -277,10 +293,10 @@ public class SimplexSolverTest {
     public void testGetBaseVariableIndexForRow() {
         SimplexSolver solver = new SimplexSolver();
         double[][] tableau = new double[][]{
-            new double[]{ 1.0,  -5.0, -6.0, 0.0,  0.0, 0.0,  0.0},
-            new double[]{ 0.0,   0.2,  0.3, 1.0,  0.0, 0.0,  0.0},
-            new double[]{ 0.0,   0.2,  0.1, 0.0,  1.0, 0.0,  0.0},
-            new double[]{ 0.0,   0.3,  0.2, 0.0,  0.0, 1.0,  0.0},
+            new double[]{ 1.0,  -5.0, -6.0, 0.0,  0.0, 0.0,  0.0, 0.0},
+            new double[]{ 0.0,   0.2,  0.3, 1.0,  0.0, 0.0,  0.0, 0.0},
+            new double[]{ 0.0,   0.2,  0.1, 0.0,  1.0, 0.0,  0.0, 0.0},
+            new double[]{ 0.0,   0.3,  0.2, 0.0,  0.0, 1.0,  0.0, 0.0},
         };
         assertEquals(0, solver.getBaseVariableIndexForRow(tableau, 0));
         assertEquals(3, solver.getBaseVariableIndexForRow(tableau, 1));

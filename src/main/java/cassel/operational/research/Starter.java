@@ -7,8 +7,6 @@ package cassel.operational.research;
 
 import cassel.operational.research.simplex.SimplexSolver;
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Starts the operational research application
@@ -35,6 +33,7 @@ public class Starter {
 //        new MainWindow().setVisible(true);
         SimplexSolver solver = new SimplexSolver();
         solver.solve(tableau);
+        System.out.println("SIMPLEX finalizado.");
     }
 
 }

@@ -7,7 +7,6 @@ package cassel.operational.research.simplex;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.text.DecimalFormat;
 
 /**
  * Class to solve Linear Problems with Simplex algorithm.
@@ -23,22 +22,24 @@ public class SimplexSolver {
     private static final int TARGET_FUNCTION_ROW_WITHIN_TABLEAU = 0;
 
     /**
+     * Solves the specified tableau
      *
      * @param tableau
      */
     public void solve(double[][] tableau) {
         int iteration = 0;
+        tableau = addDivisionResultColumn(tableau);
         tableau = addSlackVariables(tableau);
         while (!isOptimal(tableau)) {
             iteration++;
-            printTableau(tableau, iteration);
             int pivotColumn = findPivotColumnIndex(tableau);
+            calculateDivisionForTableau(tableau, pivotColumn);
+            printTableau(tableau, iteration);
             int pivotRow = findPivotRowIndex(tableau, pivotColumn);
             tableau = createTableauFromPivot(tableau, pivotRow, pivotColumn);
         }
         iteration++;
         printTableau(tableau, iteration);
-        System.out.println("SIMPLEX finalizado.");
     }
 
     /**
@@ -74,6 +75,23 @@ public class SimplexSolver {
             tableauWithSlacks[i] = rowWithSlack;
         }
         return tableauWithSlacks;
+    }
+
+    /**
+     * Adds a columns to each row repesenting the division between the last
+     * result and the pivot column
+     *
+     * @param tableau current tableau
+     * @return tableau with division result column
+     */
+    public double[][] addDivisionResultColumn(double[][] tableau) {
+        double[][] tableauWithDivisionResult = new double[tableau.length][];
+        for (int i = 0; i < tableau.length; i++) {
+            double[] rowWithDivisionResult = new double[tableau[i].length + 1];
+            System.arraycopy(tableau[i], 0, rowWithDivisionResult, 0, tableau[i].length);
+            tableauWithDivisionResult[i] = rowWithDivisionResult;
+        }
+        return tableauWithDivisionResult;
     }
 
     /**
@@ -114,7 +132,8 @@ public class SimplexSolver {
      * @return {@code true} if the specified tableau is optimal
      */
     public boolean isOptimal(double[][] tableau) {
-        for (int i = 0; i < tableau[TARGET_FUNCTION_ROW_WITHIN_TABLEAU].length; i++) {
+        int variables = getNumberOfVariables(tableau[TARGET_FUNCTION_ROW_WITHIN_TABLEAU]);
+        for (int i = 0; i < variables; i++) {
             if (tableau[TARGET_FUNCTION_ROW_WITHIN_TABLEAU][i] < 0) {
                 return false;
             }
@@ -162,13 +181,29 @@ public class SimplexSolver {
         int bestRowIndex = 0;
         double smallestResult = Double.MAX_VALUE;
         for (int i = 1; i < tableau.length; i++) {
-            double divisionResult = calculateDivisionForRow(tableau, i, pivotColumnIndex);
+            double[] currentRow = tableau[i];
+            double divisionResult = tableau[i][getPivotDivisionColumnIndex(currentRow)];
             if (divisionResult <= smallestResult) {
                 bestRowIndex = i;
                 smallestResult = divisionResult;
             }
         }
         return bestRowIndex;
+    }
+
+    /**
+     * Calculates the pivot division for every tableau row
+     *
+     * @param tableau
+     * @param pivotColumnIndex
+     */
+    private void calculateDivisionForTableau(double[][] tableau, int pivotColumnIndex) {
+        for (int i = 1; i < tableau.length; i++) {
+            double[] currentRow = tableau[i];
+            int divisionIndex = getPivotDivisionColumnIndex(currentRow);
+            double divisionResult = calculateDivisionForRow(tableau, i, pivotColumnIndex);
+            currentRow[divisionIndex] = divisionResult;
+        }
     }
 
     /**
@@ -208,6 +243,18 @@ public class SimplexSolver {
      * @return constraint equality value
      */
     private int getConstraintEqualityIndex(double[] row) {
+        // The constraint index is not the last one because the last is de pivot division result
+        return row.length - 2;
+    }
+
+    /**
+     * Returns the index of the pivot division
+     *
+     * @param row row values
+     * @return pivot division column index
+     */
+    private int getPivotDivisionColumnIndex(double[] row) {
+        // The constraint index is not the last one because the last is de pivot division result
         return row.length - 1;
     }
 
@@ -228,7 +275,7 @@ public class SimplexSolver {
         // Divides every value of the pivot row from the pivot value
         double[] pivotRow = tableau[pivotRowIndex];
         double pivotValue = pivotRow[pivotColumnIndex];
-        for (int i = 0; i < pivotRow.length; i++) {
+        for (int i = 0; i < (getNumberOfVariables(pivotRow) + 1); i++) {
             double currentPivotRowValue = pivotRow[i];
             newTableau[pivotRowIndex][i] = currentPivotRowValue / pivotValue;
         }
@@ -238,7 +285,7 @@ public class SimplexSolver {
         // The rule is:
         //    - New tableau value = (Negative value in old tableau pivot column) * (value in new tableau pivot row) + (Old tableau value)
         for (int i = 0; i < tableau.length; i++) {
-            for (int j = 0; j < tableau[i].length; j++) {
+            for (int j = 0; j < (getNumberOfVariables(tableau[i]) + 1); j++) {
                 // Checks if variable hasn't been modified yet by the
                 // operations above
                 if (i != pivotRowIndex && j != pivotColumnIndex) {
@@ -272,7 +319,7 @@ public class SimplexSolver {
             printTotalForRow(tableau[i]);
             printVariablesValues(tableau[i]);
             printLineNumber(i);
-            System.out.print("|");
+            printDivisionResultForRow(tableau[i]);
             System.out.println();
         }
         printRowSeparator(tableau);
@@ -296,6 +343,7 @@ public class SimplexSolver {
             System.out.print("|");
         }
         System.out.print(" Linha|");
+        System.out.print("Divis.|");
         System.out.println("");
     }
 
@@ -307,9 +355,9 @@ public class SimplexSolver {
     private void printRowSeparator(double[][] tableau) {
         int variables = getNumberOfVariables(tableau);
         //
-        // Total columns = Base variable + variables + total value for row + current line
+        // Total columns = Base variable + variables + total value for row + division row + current line
         //
-        int totalColumns = variables + 1 + 1 + 1;
+        int totalColumns = variables + 1 + 1 + 1 + 1;
         for (int i = 0; i < totalColumns; i++) {
             System.out.print("+");
             System.out.print(repeat("-", 6));
@@ -366,6 +414,18 @@ public class SimplexSolver {
      */
     private void printLineNumber(int lineNumber) {
         System.out.print(String.format("%6d", lineNumber));
+        System.out.print("|");
+    }
+    
+    /**
+     * Prints the division result for the specified row
+     * 
+     * @param row 
+     */
+    private void printDivisionResultForRow(double[] row) {
+        int divisionIndex = getPivotDivisionColumnIndex(row);
+        printValueHandlingDecimals(row[divisionIndex]);
+        System.out.print("|");
     }
 
     /**
@@ -386,12 +446,8 @@ public class SimplexSolver {
      * @return number of variables
      */
     private int getNumberOfVariables(double[] row) {
-        //
-        // The last column is the total value and is not a variable, so is
-        // disconsidered.
-        //
-        int variables = row.length - 1;
-        return variables;
+        int constraintEqualityIndex = getConstraintEqualityIndex(row);
+        return constraintEqualityIndex;
     }
 
     /**
