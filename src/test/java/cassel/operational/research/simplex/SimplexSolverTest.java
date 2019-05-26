@@ -25,7 +25,7 @@ public class SimplexSolverTest {
             new double[]{1.5, 2.0},
         };
         double[][] expected = new double[][]{
-            new double[]{1.5, 1.0, 2.0},
+            new double[]{1.0, 1.5, 2.0},
         };
         assertArrayEquals(expected, solver.addSlackVariables(tableau));
     }
@@ -49,7 +49,7 @@ public class SimplexSolverTest {
             new double[]{2.0, 1.0, 1.0, 14.0},
         };
         double[][] expected = new double[][]{
-            new double[]{2.0, 1.0, 1.0, 1.0, 14.0},
+            new double[]{1.0, 2.0, 1.0, 1.0, 14.0},
         };
         assertArrayEquals(expected, solver.addSlackVariables(tableau));
     }
@@ -62,8 +62,8 @@ public class SimplexSolverTest {
             new double[]{4.0, 2.0, 3.0, 28.0},
         };
         double[][] expected = new double[][]{
-            new double[]{2.0, 1.0, 1.0, 1.0, 0.0, 14.0},
-            new double[]{4.0, 2.0, 3.0, 0.0, 1.0, 28.0},
+            new double[]{1.0, 2.0, 1.0, 1.0, 0.0, 14.0},
+            new double[]{0.0, 4.0, 2.0, 3.0, 1.0, 28.0},
         };
         assertArrayEquals(expected, solver.addSlackVariables(tableau));
     }
@@ -77,9 +77,9 @@ public class SimplexSolverTest {
             new double[]{2.0, 5.0, 5.0, 30.0},
         };
         double[][] expected = new double[][]{
-            new double[]{2.0, 1.0, 1.0, 1.0, 0.0, 0.0, 14.0},
-            new double[]{4.0, 2.0, 3.0, 0.0, 1.0, 0.0, 28.0},
-            new double[]{2.0, 5.0, 5.0, 0.0, 0.0, 1.0, 30.0},
+            new double[]{1.0, 2.0, 1.0, 1.0, 0.0, 0.0, 14.0},
+            new double[]{0.0, 4.0, 2.0, 3.0, 1.0, 0.0, 28.0},
+            new double[]{0.0, 2.0, 5.0, 5.0, 0.0, 1.0, 30.0},
         };
         assertArrayEquals(expected, solver.addSlackVariables(tableau));
     }
@@ -162,12 +162,21 @@ public class SimplexSolverTest {
     }
 
     @Test
+    public void testFindPivotColumnWithTotalResult() {
+        SimplexSolver solver = new SimplexSolver();
+        double[][] tableau = new double[][]{
+            new double[]{1.0, -0.98, 0.0, 19.98, 0.0, 0.0, 36.0},
+        };
+        assertEquals(1, solver.findPivotColumnIndex(tableau));
+    }
+
+    @Test
     public void testFindPivotColumnIndexAllPositive() {
         SimplexSolver solver = new SimplexSolver();
         double[][] tableau = new double[][]{
             new double[]{2.0, 7.0, 1.5},
         };
-        assertEquals(1, solver.findPivotColumnIndex(tableau));
+        assertEquals(0, solver.findPivotColumnIndex(tableau));
     }
 
     @Test
@@ -176,7 +185,7 @@ public class SimplexSolverTest {
         double[][] tableau = new double[][]{
             new double[]{2.0, 7.0, -25.5},
         };
-        assertEquals(2, solver.findPivotColumnIndex(tableau));
+        assertEquals(0, solver.findPivotColumnIndex(tableau));
     }
 
     @Test
@@ -248,7 +257,6 @@ public class SimplexSolverTest {
         assertEquals(1, solver.findPivotRowIndex(tableau, 2));
     }
     
-
     @Test
     public void testCreateTableauFromPivot() {
         SimplexSolver solver = new SimplexSolver();
@@ -263,6 +271,33 @@ public class SimplexSolverTest {
             new double[]{-6.0,   0.0, -5.0, 0.0,  2.0, 1.0, 16.0},
         };
         assertArrayEquals(expected, solver.createTableauFromPivot(tableau, 1, 1));
+    }
+    
+    @Test
+    public void testGetBaseVariableIndexForRow() {
+        SimplexSolver solver = new SimplexSolver();
+        double[][] tableau = new double[][]{
+            new double[]{ 1.0,  -5.0, -6.0, 0.0,  0.0, 0.0,  0.0},
+            new double[]{ 0.0,   0.2,  0.3, 1.0,  0.0, 0.0,  0.0},
+            new double[]{ 0.0,   0.2,  0.1, 0.0,  1.0, 0.0,  0.0},
+            new double[]{ 0.0,   0.3,  0.2, 0.0,  0.0, 1.0,  0.0},
+        };
+        assertEquals(0, solver.getBaseVariableIndexForRow(tableau, 0));
+        assertEquals(3, solver.getBaseVariableIndexForRow(tableau, 1));
+        assertEquals(4, solver.getBaseVariableIndexForRow(tableau, 2));
+        assertEquals(5, solver.getBaseVariableIndexForRow(tableau, 3));
+    }
+
+    @Test
+    public void testGetBaseVariableIndexForRowInvalid() {
+        SimplexSolver solver = new SimplexSolver();
+        double[][] tableau = new double[][]{
+            new double[]{ 0.0,  -5.0, -6.0, 0.0,  0.0, 0.0,  0.0},
+            new double[]{ 0.0,   0.2,  0.3, 1.0,  0.0, 0.0,  0.0},
+            new double[]{ 0.0,   0.2,  0.1, 0.0,  1.0, 0.0,  0.0},
+            new double[]{ 0.0,   0.3,  0.2, 0.0,  0.0, 1.0,  0.0},
+        };
+        assertEquals(-1, solver.getBaseVariableIndexForRow(tableau, 0));
     }
 
 }
