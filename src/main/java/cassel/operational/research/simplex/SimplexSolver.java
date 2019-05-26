@@ -256,39 +256,161 @@ public class SimplexSolver {
      */
     private void printTableau(double[][] tableau, int iteration) {
         System.out.println("Tableau in iteration " + iteration + ":");
-        System.out.print("+");
-        System.out.print(repeat("-", (8 * (tableau[0].length)) - 1));
-        System.out.print("+");
-        System.out.println("");
+        printHeader(tableau);
+        int totalRows = tableau.length;
+        for (int i = 0; i < totalRows; i++) {
+            printRowSeparator(tableau);
+            System.out.print("|");
+            printBaseVariableForRow(tableau, i);
+            printTotalForRow(tableau[i]);
+            printVariablesValues(tableau[i]);
+            printLineNumber(i);
+            System.out.print("|");
+            System.out.println();
+        }
+        printRowSeparator(tableau);
+    }
+    
+    /**
+     * Prints the tableau header
+     * 
+     * @param tableau 
+     */
+    private void printHeader(double[][] tableau) {
+        printRowSeparator(tableau);
         System.out.print("|");
-        for (int i = 0; i < tableau[0].length - 1; i++) {
+        System.out.print("  Base");
+        System.out.print("|");
+        System.out.print("Vlr.Co");
+        System.out.print("|");
+        int variables = getNumberOfVariables(tableau);
+        for (int i = 0; i < variables; i++) {
             System.out.print("    x" + i);
             System.out.print("|");
         }
-        System.out.print("Vlr.Co");
-        System.out.print("|");
         System.out.print(" Linha|");
         System.out.println("");
-        System.out.print("|");
-        
-        for (int i = 0; i < tableau.length; i++) {
+    }
+    
+    /**
+     * Prints the row separator
+     * 
+     * @param tableau 
+     */
+    private void printRowSeparator(double[][] tableau) {
+        int variables = getNumberOfVariables(tableau);
+        //
+        // Total columns = Base variable + variables + total value for row + current line
+        //
+        int totalColumns = variables + 1 + 1 + 1;
+        for (int i = 0; i < totalColumns; i++) {
             System.out.print("+");
-            System.out.print(repeat("-", (8 * (tableau[0].length)) - 1));
-            System.out.print("+");
-            System.out.println();
-            System.out.print("|");
-            for (int j = 0; j < tableau[i].length; j++) {
-                String formatted = String.format("%6.2f", tableau[i][j]);
-                System.out.print(formatted + "|");
-            }
-            System.out.print(String.format("%6d", i));
-            System.out.print("|");
-            System.out.println();
+            System.out.print(repeat("-", 6));
         }
         System.out.print("+");
-        System.out.print(repeat("-", (8 * (tableau[0].length)) - 1));
-        System.out.print("+");
         System.out.println();
+    }
+    
+    /**
+     * Prints the variables values for the specified row
+     * 
+     * @param row 
+     */
+    private void printVariablesValues(double[] row) {
+        int variables = getNumberOfVariables(row);
+        for (int i = 0; i < variables; i++) {
+            String formatted = String.format("%6.2f", row[i]);
+            System.out.print(formatted + "|");
+        }
+    }
+    
+    /**
+     * Prints the total value for the specified row
+     * 
+     * @param row 
+     */
+    private void printTotalForRow(double[] row) {
+        int totalIndex = getConstraintEqualityIndex(row);
+        String formatted = String.format("%6.2f", row[totalIndex]);
+        System.out.print(formatted + "|");
+    }
+    
+    /**
+     * Prints the current line number
+     * 
+     * @param lineNumber 
+     */
+    private void printLineNumber(int lineNumber) {
+        System.out.print(String.format("%6d", lineNumber));
+    }
+    
+    /**
+     * Returns the number of variables in tableau
+     * 
+     * @param tableau
+     * @return number of variables
+     */
+    private int getNumberOfVariables(double[][] tableau) {
+        return getNumberOfVariables(tableau[0]);
+    }
+    
+    /**
+     * Returns the number of variables for row in tableau
+     * 
+     * @param row
+     * @return number of variables
+     */
+    private int getNumberOfVariables(double[] row) {
+        //
+        // Every row has the same amount of variables, so uses the first row.
+        // The last column is the total value and is not a variable, so is
+        // disconsidered.
+        //
+        int variables = row.length - 1;
+        return variables;
+    }
+    
+    /**
+     * Exibe a variável básica/base para a linha especificada
+     * 
+     * @param tableau
+     * @param rowIndex
+     */
+    private void printBaseVariableForRow(double[][] tableau, int rowIndex) {
+        int baseIndex = getBaseVariableIndexForRow(tableau, rowIndex);
+        System.out.print("    x" + baseIndex);
+        System.out.print("|");
+    }
+    
+    /**
+     * Retorna o índice da variável básica/base para a linha especificada.
+     * 
+     * <p> Uma variável básica é a única que possui coeficiente 1 positivo e 
+     * só existe na linha atual.
+     * 
+     * @param tableau
+     * @param rowIndex
+     * @return int
+     */
+    private int getBaseVariableIndexForRow(double[][] tableau, int rowIndex) {
+        int variables = getNumberOfVariables(tableau[rowIndex]);
+        // Iterates over the variables of the current row
+        for (int i = 0; i < variables; i++) {
+            // If this variable possibly represents a base variable
+            if (tableau[rowIndex][i] == 1) {
+                // Guarantees this variable has zero value on the other rows
+                boolean baseVariable = true;
+                for (int j = 0; j < tableau.length; j++) {
+                    if (j != rowIndex && tableau[j][i] != 0) {
+                        baseVariable = false;
+                    }
+                }
+                if (baseVariable) {
+                    return i;
+                }
+            }
+        }
+        return -1;
     }
     
     
