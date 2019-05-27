@@ -5,6 +5,7 @@
  */
 package cassel.operational.research;
 
+import cassel.operational.research.simplex.SimplexPrinter;
 import cassel.operational.research.simplex.SimplexSolver;
 import java.io.IOException;
 
@@ -31,7 +32,7 @@ public class Starter {
             }
         }
 //        new MainWindow().setVisible(true);
-        SimplexSolver solver = new SimplexSolver();
+        SimplexSolver solver = new SimplexSolver().addSimplexListener(new SimplexPrinter());
         solver.solve(tableau);
         System.out.println("SIMPLEX finalizado.");
     }

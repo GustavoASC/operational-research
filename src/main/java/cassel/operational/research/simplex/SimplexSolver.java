@@ -7,6 +7,8 @@ package cassel.operational.research.simplex;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Class to solve Linear Problems with Simplex algorithm.
@@ -20,6 +22,26 @@ public class SimplexSolver {
      * starting from zero index
      */
     private static final int TARGET_FUNCTION_ROW_WITHIN_TABLEAU = 0;
+    /* List with listeners to simplex tableau completions */
+    private final List<SimplexListener> listeners;
+
+    /**
+     * Creates a new Simplex solver
+     */
+    public SimplexSolver() {
+        this.listeners = new LinkedList<>();
+    }
+    
+    /**
+     * Adds a new Simplex listener
+     * 
+     * @param l listener to be added
+     * @return this
+     */
+    public SimplexSolver addSimplexListener(SimplexListener l) {
+        listeners.add(l);
+        return this;
+    }
 
     /**
      * Solves the specified tableau
@@ -34,12 +56,24 @@ public class SimplexSolver {
             iteration++;
             int pivotColumn = findPivotColumnIndex(tableau);
             calculateDivisionForTableau(tableau, pivotColumn);
-            printTableau(tableau, iteration);
+            fireTableauIterationSolved(tableau, iteration);
             int pivotRow = findPivotRowIndex(tableau, pivotColumn);
             tableau = createTableauFromPivot(tableau, pivotRow, pivotColumn);
         }
         iteration++;
-        printTableau(tableau, iteration);
+        fireTableauIterationSolved(tableau, iteration);
+    }
+    
+    /**
+     * Fires a tableau iteration solved listener
+     * 
+     * @param tableau
+     * @param iteration 
+     */
+    private void fireTableauIterationSolved(double[][] tableau, int iteration) {
+        listeners.forEach((l) -> {
+            l.handle(tableau, iteration);
+        });
     }
 
     /**
@@ -62,7 +96,7 @@ public class SimplexSolver {
             for (int j = 0; j < currentOriginalTableauRow.length; j++) {
                 // The constraint equality is not copied yet because it will 
                 // be copied after the slack variable is inserted
-                if (j != getConstraintEqualityIndex(currentOriginalTableauRow)) {
+                if (j != SimplexUtils.getConstraintEqualityIndex(currentOriginalTableauRow)) {
                     rowWithSlack[j + 1] = currentOriginalTableauRow[j];
                 }
             }
@@ -70,7 +104,7 @@ public class SimplexSolver {
             int slackVariableIndex = calculateSlackIndex(currentOriginalTableauRow, i);
             rowWithSlack[slackVariableIndex] = 1.0;
             // Reinserts the constraint equality value
-            rowWithSlack[getConstraintEqualityIndex(rowWithSlack)] = getConstraintEqualityValue(currentOriginalTableauRow);
+            rowWithSlack[SimplexUtils.getConstraintEqualityIndex(rowWithSlack)] = getConstraintEqualityValue(currentOriginalTableauRow);
             // Adds the new row to the new tableau matrix
             tableauWithSlacks[i] = rowWithSlack;
         }
@@ -106,7 +140,7 @@ public class SimplexSolver {
         if (slackNumber == 0) {
             return 0;
         }
-        int constraintIndex = getConstraintEqualityIndex(row);
+        int constraintIndex = SimplexUtils.getConstraintEqualityIndex(row);
         int constraintFromEnd = row.length - constraintIndex;
         int slackIndexWithinRow = row.length + slackNumber - constraintFromEnd;
         return slackIndexWithinRow;
@@ -132,7 +166,7 @@ public class SimplexSolver {
      * @return {@code true} if the specified tableau is optimal
      */
     public boolean isOptimal(double[][] tableau) {
-        int variables = getNumberOfVariables(tableau[TARGET_FUNCTION_ROW_WITHIN_TABLEAU]);
+        int variables = SimplexUtils.getNumberOfVariables(tableau[TARGET_FUNCTION_ROW_WITHIN_TABLEAU]);
         for (int i = 0; i < variables; i++) {
             if (tableau[TARGET_FUNCTION_ROW_WITHIN_TABLEAU][i] < 0) {
                 return false;
@@ -154,7 +188,7 @@ public class SimplexSolver {
     public int findPivotColumnIndex(double[][] tableau) {
         double largestValue = 0.0;
         int bestCollumnIndex = 0;
-        int variables = getNumberOfVariables(tableau);
+        int variables = SimplexUtils.getNumberOfVariables(tableau);
         for (int i = 0; i < variables; i++) {
             double currentValue = tableau[TARGET_FUNCTION_ROW_WITHIN_TABLEAU][i];
             if (currentValue <= largestValue) {
@@ -182,7 +216,7 @@ public class SimplexSolver {
         double smallestResult = Double.MAX_VALUE;
         for (int i = 1; i < tableau.length; i++) {
             double[] currentRow = tableau[i];
-            double divisionResult = tableau[i][getPivotDivisionColumnIndex(currentRow)];
+            double divisionResult = tableau[i][SimplexUtils.getPivotDivisionColumnIndex(currentRow)];
             if (divisionResult <= smallestResult) {
                 bestRowIndex = i;
                 smallestResult = divisionResult;
@@ -200,7 +234,7 @@ public class SimplexSolver {
     private void calculateDivisionForTableau(double[][] tableau, int pivotColumnIndex) {
         for (int i = 1; i < tableau.length; i++) {
             double[] currentRow = tableau[i];
-            int divisionIndex = getPivotDivisionColumnIndex(currentRow);
+            int divisionIndex = SimplexUtils.getPivotDivisionColumnIndex(currentRow);
             double divisionResult = calculateDivisionForRow(tableau, i, pivotColumnIndex);
             currentRow[divisionIndex] = divisionResult;
         }
@@ -232,30 +266,8 @@ public class SimplexSolver {
      * @return constraint equality value
      */
     private double getConstraintEqualityValue(double[] row) {
-        int index = getConstraintEqualityIndex(row);
+        int index = SimplexUtils.getConstraintEqualityIndex(row);
         return row[index];
-    }
-
-    /**
-     * Returns the index of the constraint for the specified row
-     *
-     * @param row row values
-     * @return constraint equality value
-     */
-    private int getConstraintEqualityIndex(double[] row) {
-        // The constraint index is not the last one because the last is de pivot division result
-        return row.length - 2;
-    }
-
-    /**
-     * Returns the index of the pivot division
-     *
-     * @param row row values
-     * @return pivot division column index
-     */
-    private int getPivotDivisionColumnIndex(double[] row) {
-        // The constraint index is not the last one because the last is de pivot division result
-        return row.length - 1;
     }
 
     /**
@@ -275,7 +287,7 @@ public class SimplexSolver {
         // Divides every value of the pivot row from the pivot value
         double[] pivotRow = tableau[pivotRowIndex];
         double pivotValue = pivotRow[pivotColumnIndex];
-        for (int i = 0; i < (getNumberOfVariables(pivotRow) + 1); i++) {
+        for (int i = 0; i < (SimplexUtils.getNumberOfVariables(pivotRow) + 1); i++) {
             double currentPivotRowValue = pivotRow[i];
             newTableau[pivotRowIndex][i] = currentPivotRowValue / pivotValue;
         }
@@ -285,7 +297,7 @@ public class SimplexSolver {
         // The rule is:
         //    - New tableau value = (Negative value in old tableau pivot column) * (value in new tableau pivot row) + (Old tableau value)
         for (int i = 0; i < tableau.length; i++) {
-            for (int j = 0; j < (getNumberOfVariables(tableau[i]) + 1); j++) {
+            for (int j = 0; j < (SimplexUtils.getNumberOfVariables(tableau[i]) + 1); j++) {
                 // Checks if variable hasn't been modified yet by the
                 // operations above
                 if (i != pivotRowIndex && j != pivotColumnIndex) {
@@ -303,209 +315,16 @@ public class SimplexSolver {
     }
 
     /**
-     * Prints the specified tableau
-     *
-     * @param tableau tableau to be printed
-     * @param interation iteration number
+     * Listener to simplex tablea iterations
      */
-    private void printTableau(double[][] tableau, int iteration) {
-        System.out.println("Iteração " + iteration + ":");
-        printHeader(tableau);
-        int totalRows = tableau.length;
-        for (int i = 0; i < totalRows; i++) {
-            printRowSeparator(tableau);
-            System.out.print("|");
-            printBaseVariableForRow(tableau, i);
-            printTotalForRow(tableau[i]);
-            printVariablesValues(tableau[i]);
-            printLineNumber(i);
-            printDivisionResultForRow(tableau[i]);
-            System.out.println();
-        }
-        printRowSeparator(tableau);
-    }
+    public interface SimplexListener {
 
-    /**
-     * Prints the tableau header
-     *
-     * @param tableau
-     */
-    private void printHeader(double[][] tableau) {
-        printRowSeparator(tableau);
-        System.out.print("|");
-        System.out.print("  Base");
-        System.out.print("|");
-        System.out.print("Vlr.Co");
-        System.out.print("|");
-        int variables = getNumberOfVariables(tableau);
-        for (int i = 0; i < variables; i++) {
-            System.out.print("    x" + i);
-            System.out.print("|");
-        }
-        System.out.print(" Linha|");
-        System.out.print("Divis.|");
-        System.out.println("");
-    }
-
-    /**
-     * Prints the row separator
-     *
-     * @param tableau
-     */
-    private void printRowSeparator(double[][] tableau) {
-        int variables = getNumberOfVariables(tableau);
-        //
-        // Total columns = Base variable + variables + total value for row + division row + current line
-        //
-        int totalColumns = variables + 1 + 1 + 1 + 1;
-        for (int i = 0; i < totalColumns; i++) {
-            System.out.print("+");
-            System.out.print(repeat("-", 6));
-        }
-        System.out.print("+");
-        System.out.println();
-    }
-
-    /**
-     * Prints the variables values for the specified row
-     *
-     * @param row
-     */
-    private void printVariablesValues(double[] row) {
-        int variables = getNumberOfVariables(row);
-        for (int i = 0; i < variables; i++) {
-            double currentValue = row[i];
-            printValueHandlingDecimals(currentValue);
-            System.out.print("|");
-        }
-    }
-
-    /**
-     * Prints the specified value handling decimals if needed
-     *
-     * @param value
-     */
-    private void printValueHandlingDecimals(double value) {
-        // If double value has no decimal
-        String formatted;
-        if (value % 1 == 0) {
-            formatted = String.format("%6d", (int) value);
-        } else {
-            formatted = String.format("%6.2f", value);
-        }
-        System.out.print(formatted);
-    }
-
-    /**
-     * Prints the total value for the specified row
-     *
-     * @param row
-     */
-    private void printTotalForRow(double[] row) {
-        int totalIndex = getConstraintEqualityIndex(row);
-        printValueHandlingDecimals(row[totalIndex]);
-        System.out.print("|");
-    }
-
-    /**
-     * Prints the current line number
-     *
-     * @param lineNumber
-     */
-    private void printLineNumber(int lineNumber) {
-        System.out.print(String.format("%6d", lineNumber));
-        System.out.print("|");
-    }
-    
-    /**
-     * Prints the division result for the specified row
-     * 
-     * @param row 
-     */
-    private void printDivisionResultForRow(double[] row) {
-        int divisionIndex = getPivotDivisionColumnIndex(row);
-        printValueHandlingDecimals(row[divisionIndex]);
-        System.out.print("|");
-    }
-
-    /**
-     * Returns the number of variables in tableau
-     *
-     * @param tableau
-     * @return number of variables
-     */
-    private int getNumberOfVariables(double[][] tableau) {
-        // Every row has the same amount of variables, so uses the first row.
-        return getNumberOfVariables(tableau[0]);
-    }
-
-    /**
-     * Returns the number of variables for row in tableau
-     *
-     * @param row
-     * @return number of variables
-     */
-    private int getNumberOfVariables(double[] row) {
-        int constraintEqualityIndex = getConstraintEqualityIndex(row);
-        return constraintEqualityIndex;
-    }
-
-    /**
-     * Exibe a variável básica/base para a linha especificada
-     *
-     * @param tableau
-     * @param rowIndex
-     */
-    private void printBaseVariableForRow(double[][] tableau, int rowIndex) {
-        int baseIndex = getBaseVariableIndexForRow(tableau, rowIndex);
-        System.out.print("    x" + baseIndex);
-        System.out.print("|");
-    }
-
-    /**
-     * Retorna o índice da variável básica/base para a linha especificada.
-     *
-     * <p>
-     * Uma variável básica é a única que possui coeficiente 1 positivo e só
-     * existe na linha atual.
-     *
-     * @param tableau
-     * @param rowIndex
-     * @return int
-     */
-    public int getBaseVariableIndexForRow(double[][] tableau, int rowIndex) {
-        int variables = getNumberOfVariables(tableau[rowIndex]);
-        // Iterates over the variables of the current row
-        for (int i = 0; i < variables; i++) {
-            // If this variable possibly represents a base variable
-            if (tableau[rowIndex][i] == 1) {
-                // Guarantees this variable has zero value on the other rows
-                boolean baseVariable = true;
-                for (int j = 0; j < tableau.length; j++) {
-                    if (j != rowIndex && tableau[j][i] != 0) {
-                        baseVariable = false;
-                    }
-                }
-                if (baseVariable) {
-                    return i;
-                }
-            }
-        }
-        return -1;
-    }
-
-    /**
-     * Repeats the specified {@code string} {@code repeatTimes} times
-     *
-     * @param target string to be repeated
-     * @param repeatTimes number of repetitions
-     * @return repeated String
-     */
-    private String repeat(String target, int repeatTimes) {
-        StringBuilder repeated = new StringBuilder();
-        for (int i = 0; i < repeatTimes; i++) {
-            repeated.append(target);
-        }
-        return repeated.toString();
+        /**
+         * Handles the tableau after its iteration
+         *
+         * @param tableau
+         * @param iteration
+         */
+        public void handle(double[][] tableau, int iteration);
     }
 }
