@@ -39,6 +39,7 @@ public class SimplexPrinter implements SimplexSolver.SimplexListener {
             System.out.println();
         }
         printRowSeparator(tableau);
+        isMultipleSolutionSimplex(tableau);
     }
 
     /**
@@ -155,7 +156,64 @@ public class SimplexPrinter implements SimplexSolver.SimplexListener {
         System.out.print("    x" + baseIndex);
         System.out.print("|");
     }
+    
+    /**
+     * Returns {@code true} if this simplex tableau has multiple solutions
+     * 
+     * @param tableau 
+     * @return {@code true} if this simplex tableau has multiple solutions
+     */
+    public boolean isMultipleSolutionSimplex(double[][] tableau) {
+        int[] baseIndexes = getBaseVariablesIndexes(tableau);
+        double[] targetFunctionRow = tableau[SimplexSolver.TARGET_FUNCTION_ROW_WITHIN_TABLEAU];
+        int variablesNumber = SimplexUtils.getNumberOfVariables(targetFunctionRow);
+        for (int i = 0; i < variablesNumber; i++) {
+            if (!isBaseVariable(baseIndexes, i)) {
+               double currentValue = targetFunctionRow[i];
+               if (currentValue == 0) {
+                   return true;
+               }
+            }
+        }
+        return false;
+    }
+    
+    /**
+     * Returns {@code true} if the {@code variableIndex} represents a base
+     * variable.
+     * 
+     * <p> To be considered a base variable, {@code variableIndex} must be
+     * present within {@code baseIndexes} array.
+     * 
+     * @param baseIndexes base variables indexes
+     * @param variableIndex target variable to check if is a base variable
+     * @return {@code true} if is a base variable
+     */
+    public boolean isBaseVariable(int[] baseIndexes, int variableIndex) {
+        for (int i = 0; i < baseIndexes.length; i++) {
+            if (baseIndexes[i] == variableIndex) {
+                return true;
+            }
+        }
+        return false;
+    }
 
+    /**
+     * Returns an array with the indexes of every base variable within tableau
+     * 
+     * @param tableau
+     * @return array with the indexes of every base variable within tableau
+     */
+    public int[] getBaseVariablesIndexes(double[][] tableau) {
+        int[] baseIndexes = new int[tableau.length];
+        int arrayIndex = 0;
+        for (int i = 0; i < tableau.length; i++) {
+            int indexForRow = getBaseVariableIndexForRow(tableau, i);
+            baseIndexes[arrayIndex++] = indexForRow;
+        }
+        return baseIndexes;
+    }
+    
     /**
      * Retorna o índice da variável básica/base para a linha especificada.
      *

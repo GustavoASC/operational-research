@@ -21,7 +21,7 @@ public class SimplexSolver {
      * Row where target function variables are found within tableau matrix,
      * starting from zero index
      */
-    private static final int TARGET_FUNCTION_ROW_WITHIN_TABLEAU = 0;
+    public static final int TARGET_FUNCTION_ROW_WITHIN_TABLEAU = 0;
     /* List with listeners to simplex tableau completions */
     private final List<SimplexListener> listeners;
 
