@@ -22,7 +22,7 @@ public class SimplexSolverTest {
         SimplexSolver.SimplexListener l = new SimplexSolver.SimplexListener() {
 
             @Override
-            public void handle(double[][] tableau, int iteration, boolean finalIteration) {
+            public void handle(double[][] tableau, int iteration, boolean finalIteration, boolean infiniteSolution) {
                 double[][] expected;
                 switch (iteration) {
                     case 1:
@@ -33,6 +33,7 @@ public class SimplexSolverTest {
                             new double[]{0.0, 0.3, 0.3, 0.0, 0.0, 1.0, 2.4, 8.0},};
                         assertArrayEquals(expected, tableau);
                         assertFalse(finalIteration);
+                        assertFalse(infiniteSolution);
                         break;
                     case 2:
                         expected = new double[][]{
@@ -42,6 +43,7 @@ public class SimplexSolverTest {
                             new double[]{0.0, 0.10, 0.0, -1.00, 0.0, 1.0, 0.60, 5.999999999999999},};
                         assertArrayEquals(expected, tableau);
                         assertFalse(finalIteration);
+                        assertFalse(infiniteSolution);
                         break;
                     case 3:
                         expected = new double[][]{
@@ -51,6 +53,7 @@ public class SimplexSolverTest {
                             new double[]{0.0, 0.0, 0.0, -0.75, -0.750000000000002, 1.0, 0.149999999999999,  0.0},};
                         assertArrayEquals(expected, tableau);
                         assertTrue(finalIteration);
+                        assertFalse(infiniteSolution);
                         break;
                     default:
                         fail("Iteration is " + iteration);
@@ -282,6 +285,17 @@ public class SimplexSolverTest {
             new double[]{30.0, 5.0, 70.0, 30.0, 5.0},
             new double[]{16.0, 5.0, 2.0, 30.0, 9.0},};
         assertEquals(1, solver.findPivotRowIndex(tableau, 2));
+    }
+
+    @Test
+    public void testFindPivotRowIndexInvalidRow() {
+        SimplexSolver solver = new SimplexSolver();
+        double[][] tableau = new double[][]{
+            new double[]{1.0,  1.0, -1.0, 0.0, 0.0, 0.0, -1.0},
+            new double[]{0.0,  1.0, -1.0, 1.0, 0.0, 0.0, -1.0},
+            new double[]{0.0,  1.0,  1.0, 0.0, 1.0, 0.0, -1.0},
+        };
+        assertEquals(-1, solver.findPivotRowIndex(tableau, 1));
     }
 
     @Test

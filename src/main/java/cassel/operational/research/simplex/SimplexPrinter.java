@@ -13,8 +13,8 @@ package cassel.operational.research.simplex;
 public class SimplexPrinter implements SimplexSolver.SimplexListener {
 
     @Override
-    public void handle(double[][] tableau, int iteration, boolean finalIteration) {
-        printTableau(tableau, iteration, finalIteration);
+    public void handle(double[][] tableau, int iteration, boolean finalIteration, boolean infiniteSolution) {
+        printTableau(tableau, iteration, finalIteration, infiniteSolution);
     }
 
     /**
@@ -23,9 +23,10 @@ public class SimplexPrinter implements SimplexSolver.SimplexListener {
      * @param tableau tableau to be printed
      * @param interation iteration number
      * @param finalIteration boolean indicating if the current iteration is the
+     * @param infiniteSolution boolean indicating if the simplex if infinite
      * last one
      */
-    private void printTableau(double[][] tableau, int iteration, boolean finalIteration) {
+    private void printTableau(double[][] tableau, int iteration, boolean finalIteration, boolean infiniteSolution) {
         System.out.println("Iteracao " + iteration + ":");
         printHeader(tableau);
         int totalRows = tableau.length;
@@ -40,8 +41,14 @@ public class SimplexPrinter implements SimplexSolver.SimplexListener {
             System.out.println();
         }
         printRowSeparator(tableau);
-        if (finalIteration && isMultipleSolutionSimplex(tableau)) {
-            System.out.println("SIMPLEX possui multiplas solucoes.");
+        if (finalIteration) {
+            if (infiniteSolution) {
+                    System.out.println("SIMPLEX possui solucao infinita.");
+            } else {
+                if (isMultipleSolutionSimplex(tableau)) {
+                    System.out.println("SIMPLEX possui multiplas solucoes.");
+                }
+            }
         }
     }
 

@@ -56,12 +56,16 @@ public class SimplexSolver {
             iteration++;
             int pivotColumn = findPivotColumnIndex(tableau);
             calculateDivisionForTableau(tableau, pivotColumn);
-            fireTableauIterationSolved(tableau, iteration, false);
             int pivotRow = findPivotRowIndex(tableau, pivotColumn);
+            if (pivotRow == -1) {
+                fireTableauIterationSolved(tableau, iteration, true, true);
+                return;
+            }
+            fireTableauIterationSolved(tableau, iteration, false, false);
             tableau = createTableauFromPivot(tableau, pivotRow, pivotColumn);
         }
         iteration++;
-        fireTableauIterationSolved(tableau, iteration, true);
+        fireTableauIterationSolved(tableau, iteration, true, false);
     }
     
     /**
@@ -69,10 +73,12 @@ public class SimplexSolver {
      * 
      * @param tableau
      * @param iteration 
+     * @param finalIteration
+     * @param infiniteSolution
      */
-    private void fireTableauIterationSolved(double[][] tableau, int iteration, boolean finalIteration) {
+    private void fireTableauIterationSolved(double[][] tableau, int iteration, boolean finalIteration, boolean infiniteSolution) {
         listeners.forEach((l) -> {
-            l.handle(tableau, iteration, finalIteration);
+            l.handle(tableau, iteration, finalIteration, infiniteSolution);
         });
     }
 
@@ -212,12 +218,12 @@ public class SimplexSolver {
      * @return most appropriate pivot row index
      */
     public int findPivotRowIndex(double[][] tableau, int pivotColumnIndex) {
-        int bestRowIndex = 0;
+        int bestRowIndex = -1;
         double smallestResult = Double.MAX_VALUE;
         for (int i = 1; i < tableau.length; i++) {
             double[] currentRow = tableau[i];
             double divisionResult = tableau[i][SimplexUtils.getPivotDivisionColumnIndex(currentRow)];
-            if (divisionResult <= smallestResult) {
+            if (divisionResult > 0 && divisionResult <= smallestResult) {
                 bestRowIndex = i;
                 smallestResult = divisionResult;
             }
@@ -325,7 +331,8 @@ public class SimplexSolver {
          * @param tableau
          * @param iteration
          * @param finalIteration 
+         * @param infiniteSolution
          */
-        public void handle(double[][] tableau, int iteration, boolean finalIteration);
+        public void handle(double[][] tableau, int iteration, boolean finalIteration, boolean infiniteSolution);
     }
 }
