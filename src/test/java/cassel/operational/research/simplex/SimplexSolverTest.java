@@ -22,7 +22,7 @@ public class SimplexSolverTest {
         SimplexSolver.SimplexListener l = new SimplexSolver.SimplexListener() {
 
             @Override
-            public void handle(double[][] tableau, int iteration) {
+            public void handle(double[][] tableau, int iteration, boolean finalIteration) {
                 double[][] expected;
                 switch (iteration) {
                     case 1:
@@ -32,6 +32,7 @@ public class SimplexSolverTest {
                             new double[]{0.0, 0.2, 0.1, 0.0, 1.0, 0.0, 1.2, 11.999999999999998},
                             new double[]{0.0, 0.3, 0.3, 0.0, 0.0, 1.0, 2.4, 8.0},};
                         assertArrayEquals(expected, tableau);
+                        assertFalse(finalIteration);
                         break;
                     case 2:
                         expected = new double[][]{
@@ -40,6 +41,7 @@ public class SimplexSolverTest {
                             new double[]{0.0, 0.133333333333333, 0.0, -0.333333333333333, 1.0, 0.0, 0.60, 4.5000000000000115},
                             new double[]{0.0, 0.10, 0.0, -1.00, 0.0, 1.0, 0.60, 5.999999999999999},};
                         assertArrayEquals(expected, tableau);
+                        assertFalse(finalIteration);
                         break;
                     case 3:
                         expected = new double[][]{
@@ -48,6 +50,7 @@ public class SimplexSolverTest {
                             new double[]{0.0, 1.0, 0.0, -2.5000000000000036, 7.500000000000019, 0.0, 4.5000000000000115,  0.0},
                             new double[]{0.0, 0.0, 0.0, -0.75, -0.750000000000002, 1.0, 0.149999999999999,  0.0},};
                         assertArrayEquals(expected, tableau);
+                        assertTrue(finalIteration);
                         break;
                     default:
                         fail("Iteration is " + iteration);

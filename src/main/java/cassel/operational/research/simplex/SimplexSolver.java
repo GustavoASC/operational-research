@@ -56,12 +56,12 @@ public class SimplexSolver {
             iteration++;
             int pivotColumn = findPivotColumnIndex(tableau);
             calculateDivisionForTableau(tableau, pivotColumn);
-            fireTableauIterationSolved(tableau, iteration);
+            fireTableauIterationSolved(tableau, iteration, false);
             int pivotRow = findPivotRowIndex(tableau, pivotColumn);
             tableau = createTableauFromPivot(tableau, pivotRow, pivotColumn);
         }
         iteration++;
-        fireTableauIterationSolved(tableau, iteration);
+        fireTableauIterationSolved(tableau, iteration, true);
     }
     
     /**
@@ -70,9 +70,9 @@ public class SimplexSolver {
      * @param tableau
      * @param iteration 
      */
-    private void fireTableauIterationSolved(double[][] tableau, int iteration) {
+    private void fireTableauIterationSolved(double[][] tableau, int iteration, boolean finalIteration) {
         listeners.forEach((l) -> {
-            l.handle(tableau, iteration);
+            l.handle(tableau, iteration, finalIteration);
         });
     }
 
@@ -191,7 +191,7 @@ public class SimplexSolver {
         int variables = SimplexUtils.getNumberOfVariables(tableau);
         for (int i = 0; i < variables; i++) {
             double currentValue = tableau[TARGET_FUNCTION_ROW_WITHIN_TABLEAU][i];
-            if (currentValue <= largestValue) {
+            if (currentValue < largestValue) {
                 largestValue = currentValue;
                 bestCollumnIndex = i;
             }
@@ -324,7 +324,8 @@ public class SimplexSolver {
          *
          * @param tableau
          * @param iteration
+         * @param finalIteration 
          */
-        public void handle(double[][] tableau, int iteration);
+        public void handle(double[][] tableau, int iteration, boolean finalIteration);
     }
 }

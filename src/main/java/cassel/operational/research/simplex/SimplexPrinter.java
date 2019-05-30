@@ -13,9 +13,8 @@ package cassel.operational.research.simplex;
 public class SimplexPrinter implements SimplexSolver.SimplexListener {
 
     @Override
-    public void handle(double[][] tableau, int iteration) {
-        printTableau(tableau, iteration);
-
+    public void handle(double[][] tableau, int iteration, boolean finalIteration) {
+        printTableau(tableau, iteration, finalIteration);
     }
 
     /**
@@ -23,8 +22,10 @@ public class SimplexPrinter implements SimplexSolver.SimplexListener {
      *
      * @param tableau tableau to be printed
      * @param interation iteration number
+     * @param finalIteration boolean indicating if the current iteration is the
+     * last one
      */
-    private void printTableau(double[][] tableau, int iteration) {
+    private void printTableau(double[][] tableau, int iteration, boolean finalIteration) {
         System.out.println("Iteracao " + iteration + ":");
         printHeader(tableau);
         int totalRows = tableau.length;
@@ -39,7 +40,9 @@ public class SimplexPrinter implements SimplexSolver.SimplexListener {
             System.out.println();
         }
         printRowSeparator(tableau);
-        isMultipleSolutionSimplex(tableau);
+        if (finalIteration && isMultipleSolutionSimplex(tableau)) {
+            System.out.println("SIMPLEX possui multiplas solucoes.");
+        }
     }
 
     /**
@@ -158,7 +161,11 @@ public class SimplexPrinter implements SimplexSolver.SimplexListener {
     }
     
     /**
-     * Returns {@code true} if this simplex tableau has multiple solutions
+     * Returns {@code true} if this simplex tableau has multiple solutions.
+     * 
+     * <p> To be considered a Multiple Solution Simplex, the objective function
+     * row needs to have a non-basic variable with coefficient zero at final
+     * iteration.
      * 
      * @param tableau 
      * @return {@code true} if this simplex tableau has multiple solutions
