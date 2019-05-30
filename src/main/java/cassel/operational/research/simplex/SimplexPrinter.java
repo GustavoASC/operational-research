@@ -25,7 +25,7 @@ public class SimplexPrinter implements SimplexSolver.SimplexListener {
      * @param interation iteration number
      */
     private void printTableau(double[][] tableau, int iteration) {
-        System.out.println("Iteração " + iteration + ":");
+        System.out.println("Iteracao " + iteration + ":");
         printHeader(tableau);
         int totalRows = tableau.length;
         for (int i = 0; i < totalRows; i++) {
