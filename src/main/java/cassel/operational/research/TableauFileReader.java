@@ -27,21 +27,39 @@ public class TableauFileReader {
      * @throws IOException if an IO error occurs
      */
     public double[][] readFromFile(String filename) throws IOException {
-        Scanner sc = new Scanner(new BufferedReader(new FileReader(filename)));
-        List<String[]> fileLines = new LinkedList<>();
-        while (sc.hasNextLine()) {
-            String[] line = sc.nextLine().trim().split(" ");
-            fileLines.add(line);
-        }
+        List<String[]> fileLines = readFileIntoList(filename);
         double[][] tableau = new double[fileLines.size()][];
-        for (int i = 0; i < fileLines.size(); i++) {
+        for (int i = 0; i < tableau.length; i++) {
             String[] currentLine = fileLines.get(i);
-            tableau[i] = new double[currentLine.length];
+            tableau[i] = new double[currentLine.length - 1];
+            int currentVariableIndex = 0;
             for (int j = 0; j < currentLine.length; j++) {
-                tableau[i][j] = Double.parseDouble(currentLine[j]);
+                if (j == currentLine.length - 2) {
+                    
+                } else {
+                    tableau[i][currentVariableIndex] = Double.parseDouble(currentLine[j]);
+                    currentVariableIndex++;
+                }
             }
         }
         return tableau;
+    }
+    
+    /**
+     * Reads the specified file into a list
+     * 
+     * @param filename file to be read
+     * @return list with file lines
+     * @throws IOException if an IO error occurs
+     */
+    private List<String[]> readFileIntoList(String filename) throws IOException {
+        Scanner sc = new Scanner(new BufferedReader(new FileReader(filename)));
+        List<String[]> fileLines = new LinkedList<>();
+        while (sc.hasNextLine()) {
+            String[] line = sc.nextLine().trim().replaceAll(" +", " ").split(" ");
+            fileLines.add(line);
+        }
+        return fileLines;
     }
 
 }
