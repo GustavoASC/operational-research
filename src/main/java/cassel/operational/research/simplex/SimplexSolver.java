@@ -11,7 +11,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
- * Class to solve Linear Problems with Simplex algorithm.
+ * Class to maximize Linear Problems with Simplex algorithm.
  *
  * @author gustavo
  */
@@ -42,13 +42,22 @@ public class SimplexSolver {
         listeners.add(l);
         return this;
     }
-
+    
     /**
-     * Solves the specified tableau
+     * Solves the specified tableau with minimization
+     * 
+     * @param tableau 
+     */
+    public void minimize(double[][] tableau) {
+
+    }
+    
+    /**
+     * Solves the specified tableau with maximization
      *
      * @param tableau
      */
-    public void solve(double[][] tableau) {
+    public void maximize(double[][] tableau) {
         int iteration = 0;
         tableau = addDivisionResultColumn(tableau);
         tableau = addSlackVariables(tableau);
@@ -108,7 +117,7 @@ public class SimplexSolver {
             }
             // Specifies the value of the slack variable for the current row
             int slackVariableIndex = calculateSlackIndex(currentOriginalTableauRow, i);
-            rowWithSlack[slackVariableIndex] = 1.0;
+                rowWithSlack[slackVariableIndex] = 1.0;
             // Reinserts the constraint equality value
             rowWithSlack[SimplexUtils.getConstraintEqualityIndex(rowWithSlack)] = getConstraintEqualityValue(currentOriginalTableauRow);
             // Adds the new row to the new tableau matrix
@@ -117,6 +126,54 @@ public class SimplexSolver {
         return tableauWithSlacks;
     }
 
+    /**
+     * Adds slack variables to the specified tableau
+     *
+     * @param tableau without slack variables
+     * @return tableau with slack variables
+     */
+    public double[][] addArtificialVariables(double[][] tableau) {
+        // Calculates the new total number of slack variables
+        int totalNewVariables = 0;
+        for (int i = 0; i < tableau.length; i++) {
+            int baseIndex = SimplexUtils.getBaseVariableIndexForRow(tableau, i);
+            if (baseIndex == -1) {
+                totalNewVariables++;
+            }
+        }
+        double[][] tableauWithSlacks = new double[tableau.length][];
+        int currentSlackIndex = 0;
+        // Adds slack variables for each row
+        for (int i = 0; i < tableau.length; i++) {
+            // References the current tableau row
+            double[] currentOriginalTableauRow = tableau[i];
+            // Creates a new array, with original row size + total slack variables to be added
+            double[] rowWithSlack = new double[currentOriginalTableauRow.length + totalNewVariables];
+            // Clones the original tableau variables to the new array
+            // For now the value of slack variables are ignored and keep zero
+            for (int j = 0; j < currentOriginalTableauRow.length; j++) {
+                // The constraint equality is not copied yet because it will 
+                // be copied after the slack variable is inserted
+                if (j != SimplexUtils.getConstraintEqualityIndex(currentOriginalTableauRow)) {
+                    rowWithSlack[j] = currentOriginalTableauRow[j];
+                }
+            }
+            // Checks if the current row already have base variable
+            int baseIndex = SimplexUtils.getBaseVariableIndexForRow(tableau, i);
+            if (baseIndex == -1) {
+                // Specifies the value of the slack variable for the current row
+                int slackVariableIndex = calculateArtificialIndex(currentOriginalTableauRow, currentSlackIndex);
+                rowWithSlack[slackVariableIndex] = 1.0;
+                currentSlackIndex++;
+            }
+            // Reinserts the constraint equality value
+            rowWithSlack[SimplexUtils.getConstraintEqualityIndex(rowWithSlack)] = getConstraintEqualityValue(currentOriginalTableauRow);
+            // Adds the new row to the new tableau matrix
+            tableauWithSlacks[i] = rowWithSlack;
+        }
+        return tableauWithSlacks;
+    }
+    
     /**
      * Adds a columns to each row repesenting the division between the last
      * result and the pivot column
@@ -146,6 +203,21 @@ public class SimplexSolver {
         if (slackNumber == 0) {
             return 0;
         }
+        int constraintIndex = SimplexUtils.getConstraintEqualityIndex(row);
+        int constraintFromEnd = row.length - constraintIndex;
+        int slackIndexWithinRow = row.length + slackNumber - constraintFromEnd;
+        return slackIndexWithinRow;
+    }
+
+    /**
+     * Calculates the index in which the slack variable should be inserted
+     *
+     * @param row row array
+     * @param slackNumber number of the slack variable to be inserted (1, 2,
+     * 3...)
+     * @return the slack index
+     */
+    private int calculateArtificialIndex(double[] row, int slackNumber) {
         int constraintIndex = SimplexUtils.getConstraintEqualityIndex(row);
         int constraintFromEnd = row.length - constraintIndex;
         int slackIndexWithinRow = row.length + slackNumber - constraintFromEnd;

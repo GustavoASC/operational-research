@@ -33,7 +33,7 @@ public class Starter {
         }
 //        new MainWindow().setVisible(true);
         SimplexSolver solver = new SimplexSolver().addSimplexListener(new SimplexPrinter());
-        solver.solve(tableau);
+        solver.maximize(tableau);
         System.out.println("SIMPLEX finalizado.");
     }
 

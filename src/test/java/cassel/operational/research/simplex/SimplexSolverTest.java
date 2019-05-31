@@ -5,14 +5,13 @@
  */
 package cassel.operational.research.simplex;
 
-import java.util.Arrays;
 import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
 
 public class SimplexSolverTest {
 
     @Test
-    public void testSolve() {
+    public void testMaximize() {
         SimplexSolver solver = new SimplexSolver();
         double[][] tableau = new double[][]{
             new double[]{-5.0, -6.0, 0.0},
@@ -60,7 +59,7 @@ public class SimplexSolverTest {
                 }
             }
         };
-        solver.addSimplexListener(l).solve(tableau);
+        solver.addSimplexListener(l).maximize(tableau);
     }
 
     @Test
@@ -119,6 +118,62 @@ public class SimplexSolverTest {
         assertArrayEquals(expected, solver.addSlackVariables(tableau));
     }
 
+    @Test
+    public void testAddMissingArtificialVariablesSecondRow() {
+        SimplexSolver solver = new SimplexSolver();
+        double[][] tableau = new double[][]{
+            new double[]{1.0, 2.0, 1.0, 1.0,  0.0, 0.0, 14.0, 0.0},
+            new double[]{0.0, 4.0, 2.0, 3.0, -1.0, 0.0, 28.0, 0.0},
+            new double[]{0.0, 2.0, 5.0, 5.0,  0.0, 1.0, 30.0, 0.0},};
+        double[][] expected = new double[][]{
+            new double[]{1.0, 2.0, 1.0, 1.0,  0.0, 0.0,  0.0, 14.0, 0.0},
+            new double[]{0.0, 4.0, 2.0, 3.0, -1.0, 0.0,  1.0, 28.0, 0.0},
+            new double[]{0.0, 2.0, 5.0, 5.0,  0.0, 1.0,  0.0, 30.0, 0.0},};
+        assertArrayEquals(expected, solver.addArtificialVariables(tableau));
+    }
+
+    @Test
+    public void testAddMissingArtificialVariablesFirstRow() {
+        SimplexSolver solver = new SimplexSolver();
+        double[][] tableau = new double[][]{
+            new double[]{0.0, 4.0, 2.0, 3.0, -1.0, 0.0, 28.0, 0.0},
+            new double[]{1.0, 2.0, 1.0, 1.0,  0.0, 0.0, 14.0, 0.0},
+            new double[]{0.0, 2.0, 5.0, 5.0,  0.0, 1.0, 30.0, 0.0},};
+        double[][] expected = new double[][]{
+            new double[]{0.0, 4.0, 2.0, 3.0, -1.0, 0.0,  1.0, 28.0, 0.0},
+            new double[]{1.0, 2.0, 1.0, 1.0,  0.0, 0.0,  0.0, 14.0, 0.0},
+            new double[]{0.0, 2.0, 5.0, 5.0,  0.0, 1.0,  0.0, 30.0, 0.0},};
+        assertArrayEquals(expected, solver.addArtificialVariables(tableau));
+    }
+
+    @Test
+    public void testAddMissingArtificialVariablesFirstAndThirdRows() {
+        SimplexSolver solver = new SimplexSolver();
+        double[][] tableau = new double[][]{
+            new double[]{0.0, 4.0, 2.0, 3.0, -1.0,  0.0, 28.0, 0.0},
+            new double[]{1.0, 2.0, 1.0, 1.0,  0.0,  0.0, 14.0, 0.0},
+            new double[]{0.0, 2.0, 5.0, 5.0,  0.0, -1.0, 30.0, 0.0},};
+        double[][] expected = new double[][]{
+            new double[]{0.0, 4.0, 2.0, 3.0, -1.0,  0.0, 1.0, 0.0, 28.0, 0.0},
+            new double[]{1.0, 2.0, 1.0, 1.0,  0.0,  0.0, 0.0, 0.0, 14.0, 0.0},
+            new double[]{0.0, 2.0, 5.0, 5.0,  0.0, -1.0, 0.0, 1.0, 30.0, 0.0},};
+        assertArrayEquals(expected, solver.addArtificialVariables(tableau));
+    }
+
+    @Test
+    public void testAddMissingArtificialVariablesThreeRows() {
+        SimplexSolver solver = new SimplexSolver();
+        double[][] tableau = new double[][]{
+            new double[]{0.0, 4.0, 2.0, 3.0, -1.0,  0.0, 28.0, 0.0},
+            new double[]{0.0, 2.0, 1.0, 1.0,  0.0,  0.0, 14.0, 0.0},
+            new double[]{0.0, 2.0, 5.0, 5.0,  0.0, -1.0, 30.0, 0.0},};
+        double[][] expected = new double[][]{
+            new double[]{0.0, 4.0, 2.0, 3.0, -1.0,  0.0, 1.0, 0.0, 0.0, 28.0, 0.0},
+            new double[]{0.0, 2.0, 1.0, 1.0,  0.0,  0.0, 0.0, 1.0, 0.0, 14.0, 0.0},
+            new double[]{0.0, 2.0, 5.0, 5.0,  0.0, -1.0, 0.0, 0.0, 1.0, 30.0, 0.0},};
+            assertArrayEquals(expected, solver.addArtificialVariables(tableau));
+    }
+    
     @Test
     public void testAddDivisionResultColumn() {
         SimplexSolver solver = new SimplexSolver();
