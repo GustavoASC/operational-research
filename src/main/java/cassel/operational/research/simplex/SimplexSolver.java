@@ -51,7 +51,7 @@ public class SimplexSolver {
     public void minimize(double[][] tableau) {
 
     }
-    
+
     /**
      * Solves the specified tableau with maximization
      *
