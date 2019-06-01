@@ -5,6 +5,9 @@
  */
 package cassel.operational.research.simplex;
 
+import java.util.Arrays;
+import java.util.Objects;
+
 /**
  * Class representing a Simplex tableau row
  *
@@ -20,6 +23,25 @@ public class SimplexRow {
     private final double equalityValue;
     /* Row division result */
     private final double divisionResult;
+
+    /**
+     * Creates a Simplex Row instance with general row information
+     * 
+     * @param variables
+     */
+    public SimplexRow(double[] variables) {
+        this(variables, EqualityType.LESS_OR_EQUAL, 0.0, 0.0);
+    }
+
+    /**
+     * Creates a Simplex Row instance with general row information
+     * 
+     * @param variables
+     * @param equalityType
+     */
+    public SimplexRow(double[] variables, EqualityType equalityType) {
+        this(variables, equalityType, 0.0, 0.0);
+    }
 
     /**
      * Creates a Simplex Row instance with general row information
@@ -76,7 +98,46 @@ public class SimplexRow {
      * Available equality types
      */
     public enum EqualityType {
-        EQUAL, LESS_THAN, GREATER_THAN
+        EQUAL, LESS_OR_EQUAL, GREATER_OR_EQUAL
     }
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 97 * hash + Arrays.hashCode(this.variables);
+        hash = 97 * hash + Objects.hashCode(this.equalityType);
+        hash = 97 * hash + (int) (Double.doubleToLongBits(this.equalityValue) ^ (Double.doubleToLongBits(this.equalityValue) >>> 32));
+        hash = 97 * hash + (int) (Double.doubleToLongBits(this.divisionResult) ^ (Double.doubleToLongBits(this.divisionResult) >>> 32));
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final SimplexRow other = (SimplexRow) obj;
+        if (Double.doubleToLongBits(this.equalityValue) != Double.doubleToLongBits(other.equalityValue)) {
+            return false;
+        }
+        if (Double.doubleToLongBits(this.divisionResult) != Double.doubleToLongBits(other.divisionResult)) {
+            return false;
+        }
+        if (!Arrays.equals(this.variables, other.variables)) {
+            return false;
+        }
+        if (this.equalityType != other.equalityType) {
+            return false;
+        }
+        return true;
+    }
+    
+    
 
 }

@@ -51,16 +51,53 @@ public class SimplexSolver {
     public void minimize(double[][] tableau) {
 
     }
-
+    
     /**
      * Solves the specified tableau with maximization
      *
      * @param tableau
      */
-    public void maximize(double[][] tableau) {
+    public void maximize(SimplexRow[] tableau) {
+        SimplexRow[] normalizedRows;
+        normalizedRows = addDivisionResultColumnToRow(tableau);
+        normalizedRows = normalizeEquations(normalizedRows);
+        double[][] result = convertRowsToMatrix(normalizedRows);
+        doMaximize(result);
+    }
+    
+    /**
+     * Converts the specified rows to a double matrix
+     * 
+     * @param rows
+     * @return tableu matrix
+     */
+    protected double[][] convertRowsToMatrix(SimplexRow[] rows) {
+        // Initializes the tableau matrix
+        double[][] tableau = new double[rows.length][];
+        // Inserts the rows values into the matrix
+        for (int i = 0; i < rows.length; i++) {
+            // Acquires the row reference
+            double[] originalRow = rows[i].getVariables();
+            // Creates a new array where values will be inserted within matrix
+            double[] doubleRow = new double[originalRow.length];
+            // Clones the values of SimplexRow to the new structure
+            for (int j = 0; j < originalRow.length; j++) {
+                doubleRow[j] = originalRow[j];
+            }
+            // Inserts the new array into the matrix
+            tableau[i] = doubleRow;
+        }
+        return tableau;
+    }
+    
+    /**
+     * Maximizes the specified tableau which contains only equations and not 
+     * inequations
+     * 
+     * @param tableau 
+     */
+    private void doMaximize(double[][] tableau) {
         int iteration = 0;
-        tableau = addDivisionResultColumn(tableau);
-        tableau = addSlackVariables(tableau);
         while (!isOptimal(tableau)) {
             iteration++;
             int pivotColumn = findPivotColumnIndex(tableau);
@@ -75,6 +112,59 @@ public class SimplexSolver {
         }
         iteration++;
         fireTableauIterationSolved(tableau, iteration, true, false);
+    }
+    
+    /**
+     * Normalizes the specified tableau transforming inequation constraints into
+     * equations
+     * 
+     * @param tableau
+     * @return normalized tableau
+     */
+    protected SimplexRow[] normalizeEquations(SimplexRow[] tableau) {
+        SimplexRow[] normalized = new SimplexRow[tableau.length];
+        int totalSlackVariables = tableau.length;
+        for (int i = 0; i < tableau.length; i++) {
+            // Acquires the current row object
+            SimplexRow row = tableau[i];
+            // References the current tableau row variables
+            double[] currentOriginalTableauRow = row.getVariables();
+            // Creates a new array, with original row size + total slack variables to be added
+            double[] rowWithSlack = new double[currentOriginalTableauRow.length + totalSlackVariables];
+            // Clones the original tableau variables to the new array
+            // For now the value of slack variables are ignored and keep zero
+            for (int j = 0; j < currentOriginalTableauRow.length; j++) {
+                // The constraint equality is not copied yet because it will 
+                // be copied after the slack variable is inserted
+                if (j != SimplexUtils.getConstraintEqualityIndex(currentOriginalTableauRow)) {
+                    rowWithSlack[j + 1] = currentOriginalTableauRow[j];
+                }
+            }
+            // Specifies the value of the slack variable for the current row
+            int slackVariableIndex = calculateSlackIndex(currentOriginalTableauRow, i);
+            // If the current row represents a less or equal inequation
+            if (row.getEqualityType() == SimplexRow.EqualityType.LESS_OR_EQUAL) {
+                rowWithSlack[slackVariableIndex] = 1.0;
+            } else {
+                rowWithSlack[slackVariableIndex] = -1.0;
+            }
+            // Reinserts the constraint equality value
+            rowWithSlack[SimplexUtils.getConstraintEqualityIndex(rowWithSlack)] = getConstraintEqualityValue(currentOriginalTableauRow);
+            // Adds the new row to the new tableau matrix
+            normalized[i] = new SimplexRow(rowWithSlack, SimplexRow.EqualityType.EQUAL, row.getEqualityValue(), row.getDivisionResult());
+        }
+        return normalized;
+    }
+
+    /**
+     * Solves the specified tableau with maximization
+     *
+     * @param tableau
+     */
+    public void maximize(double[][] tableau) {
+        tableau = addDivisionResultColumn(tableau);
+        tableau = addSlackVariables(tableau);
+        doMaximize(tableau);
     }
     
     /**
@@ -187,6 +277,25 @@ public class SimplexSolver {
             double[] rowWithDivisionResult = new double[tableau[i].length + 1];
             System.arraycopy(tableau[i], 0, rowWithDivisionResult, 0, tableau[i].length);
             tableauWithDivisionResult[i] = rowWithDivisionResult;
+        }
+        return tableauWithDivisionResult;
+    }
+
+    /**
+     * Adds a columns to each row repesenting the division between the last
+     * result and the pivot column
+     *
+     * @param tableau current tableau
+     * @return tableau with division result column
+     */
+    public SimplexRow[] addDivisionResultColumnToRow(SimplexRow[] tableau) {
+        SimplexRow[] tableauWithDivisionResult = new SimplexRow[tableau.length];
+        for (int i = 0; i < tableau.length; i++) {
+            SimplexRow currentRow = tableau[i];
+            double[] currentRowVariables = currentRow.getVariables();
+            double[] rowWithDivisionResult = new double[currentRowVariables.length + 1];
+            System.arraycopy(currentRowVariables, 0, rowWithDivisionResult, 0, currentRowVariables.length);
+            tableauWithDivisionResult[i] = new SimplexRow(rowWithDivisionResult, currentRow.getEqualityType(), currentRow.getEqualityValue(), currentRow.getDivisionResult());
         }
         return tableauWithDivisionResult;
     }

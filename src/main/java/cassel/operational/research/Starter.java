@@ -6,6 +6,7 @@
 package cassel.operational.research;
 
 import cassel.operational.research.simplex.SimplexPrinter;
+import cassel.operational.research.simplex.SimplexRow;
 import cassel.operational.research.simplex.SimplexSolver;
 import java.io.IOException;
 
@@ -17,11 +18,11 @@ import java.io.IOException;
 public class Starter {
 
     public static void main(String[] args) {
-        double[][] tableau = new double[][]{
-            new double[]{-5.0, -6.0, 0.0},
-            new double[]{ 0.2,  0.3, 1.8},
-            new double[]{ 0.2,  0.1, 1.2},
-            new double[]{ 0.3,  0.3, 2.4},
+        SimplexRow[] tableau = new SimplexRow[]{
+            new SimplexRow(new double[]{-5.0, -6.0, 0.0}, SimplexRow.EqualityType.LESS_OR_EQUAL),
+            new SimplexRow(new double[]{ 0.2,  0.3, 1.8}, SimplexRow.EqualityType.LESS_OR_EQUAL),
+            new SimplexRow(new double[]{ 0.2,  0.1, 1.2}, SimplexRow.EqualityType.LESS_OR_EQUAL),
+            new SimplexRow(new double[]{ 0.3,  0.3, 2.4}, SimplexRow.EqualityType.LESS_OR_EQUAL),
         };
         if (args.length > 0) {
             String filename = args[0];

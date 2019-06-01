@@ -5,6 +5,7 @@
  */
 package cassel.operational.research;
 
+import cassel.operational.research.simplex.SimplexRow;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -26,21 +27,22 @@ public class TableauFileReader {
      * @return tableau as a double array
      * @throws IOException if an IO error occurs
      */
-    public double[][] readFromFile(String filename) throws IOException {
+    public SimplexRow[] readFromFile(String filename) throws IOException {
         List<String[]> fileLines = readFileIntoList(filename);
-        double[][] tableau = new double[fileLines.size()][];
+        SimplexRow[] tableau = new SimplexRow[fileLines.size()];
         for (int i = 0; i < tableau.length; i++) {
             String[] currentLine = fileLines.get(i);
-            tableau[i] = new double[currentLine.length - 1];
+            double[] rowVariables = new double[currentLine.length - 1];
             int currentVariableIndex = 0;
             for (int j = 0; j < currentLine.length; j++) {
                 if (j == currentLine.length - 2) {
                     
                 } else {
-                    tableau[i][currentVariableIndex] = Double.parseDouble(currentLine[j]);
+                    rowVariables[currentVariableIndex] = Double.parseDouble(currentLine[j]);
                     currentVariableIndex++;
                 }
             }
+            tableau[i] = new SimplexRow(rowVariables);
         }
         return tableau;
     }
