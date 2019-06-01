@@ -94,13 +94,6 @@ public class SimplexRow {
         return divisionResult;
     }
 
-    /**
-     * Available equality types
-     */
-    public enum EqualityType {
-        EQUAL, LESS_OR_EQUAL, GREATER_OR_EQUAL
-    }
-
     @Override
     public int hashCode() {
         int hash = 7;

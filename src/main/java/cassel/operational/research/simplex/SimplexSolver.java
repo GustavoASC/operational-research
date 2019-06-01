@@ -143,7 +143,7 @@ public class SimplexSolver {
             // Specifies the value of the slack variable for the current row
             int slackVariableIndex = calculateSlackIndex(currentOriginalTableauRow, i);
             // If the current row represents a less or equal inequation
-            if (row.getEqualityType() == SimplexRow.EqualityType.LESS_OR_EQUAL) {
+            if (row.getEqualityType() != EqualityType.GREATER_OR_EQUAL ) {
                 rowWithSlack[slackVariableIndex] = 1.0;
             } else {
                 rowWithSlack[slackVariableIndex] = -1.0;
@@ -151,7 +151,7 @@ public class SimplexSolver {
             // Reinserts the constraint equality value
             rowWithSlack[SimplexUtils.getConstraintEqualityIndex(rowWithSlack)] = getConstraintEqualityValue(currentOriginalTableauRow);
             // Adds the new row to the new tableau matrix
-            normalized[i] = new SimplexRow(rowWithSlack, SimplexRow.EqualityType.EQUAL, row.getEqualityValue(), row.getDivisionResult());
+            normalized[i] = new SimplexRow(rowWithSlack, EqualityType.EQUAL, row.getEqualityValue(), row.getDivisionResult());
         }
         return normalized;
     }

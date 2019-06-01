@@ -115,12 +115,23 @@ public class SimplexSolverTest {
     }
 
     @Test
+    public void testNormalizeEquationsEqualSingleSmallRow() {
+        SimplexSolver solver = new SimplexSolver();
+        SimplexRow[] tableau = new SimplexRow[]{
+            new SimplexRow(new double[]{1.0, 1.5, 2.0}, EqualityType.EQUAL)};
+        SimplexRow[] expected = new SimplexRow[]{
+            new SimplexRow(new double[]{1.0, 1.0, 1.5, 2.0}, EqualityType.EQUAL)};
+        SimplexRow[] result = solver.normalizeEquations(tableau);
+        assertArrayEquals(expected, result);
+    }
+
+    @Test
     public void testNormalizeEquationsLessOrEqualSingleSmallRow() {
         SimplexSolver solver = new SimplexSolver();
         SimplexRow[] tableau = new SimplexRow[]{
-            new SimplexRow(new double[]{1.5, 2.0}, SimplexRow.EqualityType.LESS_OR_EQUAL)};
+            new SimplexRow(new double[]{1.5, 2.0}, EqualityType.LESS_OR_EQUAL)};
         SimplexRow[] expected = new SimplexRow[]{
-            new SimplexRow(new double[]{1.0, 1.5, 2.0}, SimplexRow.EqualityType.EQUAL)};
+            new SimplexRow(new double[]{1.0, 1.5, 2.0}, EqualityType.EQUAL)};
         SimplexRow[] result = solver.normalizeEquations(tableau);
         assertArrayEquals(expected, result);
     }
@@ -172,9 +183,9 @@ public class SimplexSolverTest {
     public void testNormalizeEquationsGreaterOrEqualSingleSmallRow() {
         SimplexSolver solver = new SimplexSolver();
         SimplexRow[] tableau = new SimplexRow[]{
-            new SimplexRow(new double[]{1.5, 2.0}, SimplexRow.EqualityType.GREATER_OR_EQUAL)};
+            new SimplexRow(new double[]{1.5, 2.0}, EqualityType.GREATER_OR_EQUAL)};
         SimplexRow[] expected = new SimplexRow[]{
-            new SimplexRow(new double[]{-1.0, 1.5, 2.0}, SimplexRow.EqualityType.EQUAL),};
+            new SimplexRow(new double[]{-1.0, 1.5, 2.0}, EqualityType.EQUAL),};
         assertArrayEquals(expected, solver.normalizeEquations(tableau));
     }
 
@@ -182,11 +193,11 @@ public class SimplexSolverTest {
     public void testNormalizeEquationsMixedTwoSmallRows() {
         SimplexSolver solver = new SimplexSolver();
         SimplexRow[] tableau = new SimplexRow[]{
-            new SimplexRow(new double[]{1.5, 0.0, 2.0}, SimplexRow.EqualityType.LESS_OR_EQUAL),
-            new SimplexRow(new double[]{1.5, 0.0, 2.0}, SimplexRow.EqualityType.GREATER_OR_EQUAL)};
+            new SimplexRow(new double[]{1.5, 0.0, 2.0}, EqualityType.LESS_OR_EQUAL),
+            new SimplexRow(new double[]{1.5, 0.0, 2.0}, EqualityType.GREATER_OR_EQUAL)};
         SimplexRow[] expected = new SimplexRow[]{
-            new SimplexRow(new double[]{1.0, 1.5, 0.0, 0.0, 0.0}, SimplexRow.EqualityType.EQUAL),
-            new SimplexRow(new double[]{0.0, 1.5, -1.0, 0.0, 0.0}, SimplexRow.EqualityType.EQUAL)};
+            new SimplexRow(new double[]{1.0, 1.5, 0.0, 0.0, 0.0}, EqualityType.EQUAL),
+            new SimplexRow(new double[]{0.0, 1.5, -1.0, 0.0, 0.0}, EqualityType.EQUAL)};
         assertArrayEquals(expected, solver.normalizeEquations(tableau));
     }
 
@@ -194,11 +205,11 @@ public class SimplexSolverTest {
     public void testNormalizeEquationsLessOrEqualTwoSmallRows() {
         SimplexSolver solver = new SimplexSolver();
         SimplexRow[] tableau = new SimplexRow[]{
-            new SimplexRow(new double[]{1.5, 0.0, 2.0}, SimplexRow.EqualityType.LESS_OR_EQUAL),
-            new SimplexRow(new double[]{1.5, 0.0, 2.0}, SimplexRow.EqualityType.LESS_OR_EQUAL)};
+            new SimplexRow(new double[]{1.5, 0.0, 2.0}, EqualityType.LESS_OR_EQUAL),
+            new SimplexRow(new double[]{1.5, 0.0, 2.0}, EqualityType.LESS_OR_EQUAL)};
         SimplexRow[] expected = new SimplexRow[]{
-            new SimplexRow(new double[]{1.0, 1.5, 0.0, 0.0, 0.0}, SimplexRow.EqualityType.EQUAL),
-            new SimplexRow(new double[]{0.0, 1.5, 1.0, 0.0, 0.0}, SimplexRow.EqualityType.EQUAL)};
+            new SimplexRow(new double[]{1.0, 1.5, 0.0, 0.0, 0.0}, EqualityType.EQUAL),
+            new SimplexRow(new double[]{0.0, 1.5, 1.0, 0.0, 0.0}, EqualityType.EQUAL)};
         SimplexRow[] result = solver.normalizeEquations(tableau);
         assertArrayEquals(expected, result);
     }
@@ -207,7 +218,7 @@ public class SimplexSolverTest {
     public void testConvertRowsToMatrixOneSmallRow() {
         SimplexSolver solver = new SimplexSolver();
         SimplexRow[] tableau = new SimplexRow[]{
-            new SimplexRow(new double[]{1.5, 0.0, 2.0}, SimplexRow.EqualityType.LESS_OR_EQUAL)};
+            new SimplexRow(new double[]{1.5, 0.0, 2.0}, EqualityType.LESS_OR_EQUAL)};
         double[][] expected = new double[][]{
             new double[]{1.5, 0.0, 2.0}};
         double[][] result = solver.convertRowsToMatrix(tableau);
@@ -218,8 +229,8 @@ public class SimplexSolverTest {
     public void testConvertRowsToMatrixTwoSmallRow() {
         SimplexSolver solver = new SimplexSolver();
         SimplexRow[] tableau = new SimplexRow[]{
-            new SimplexRow(new double[]{1.5, 0.0, 2.0}, SimplexRow.EqualityType.LESS_OR_EQUAL),
-            new SimplexRow(new double[]{7.5, 0.0, 2.0}, SimplexRow.EqualityType.LESS_OR_EQUAL)};
+            new SimplexRow(new double[]{1.5, 0.0, 2.0}, EqualityType.LESS_OR_EQUAL),
+            new SimplexRow(new double[]{7.5, 0.0, 2.0}, EqualityType.LESS_OR_EQUAL)};
         double[][] expected = new double[][]{
             new double[]{1.5, 0.0, 2.0},
             new double[]{7.5, 0.0, 2.0}};

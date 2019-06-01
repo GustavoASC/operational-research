@@ -5,6 +5,7 @@
  */
 package cassel.operational.research;
 
+import cassel.operational.research.simplex.EqualityType;
 import cassel.operational.research.simplex.SimplexRow;
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -33,16 +34,17 @@ public class TableauFileReader {
         for (int i = 0; i < tableau.length; i++) {
             String[] currentLine = fileLines.get(i);
             double[] rowVariables = new double[currentLine.length - 1];
+            EqualityType type = EqualityType.LESS_OR_EQUAL;
             int currentVariableIndex = 0;
             for (int j = 0; j < currentLine.length; j++) {
                 if (j == currentLine.length - 2) {
-                    
+                    type = EqualityType.fromSymbol(currentLine[j]);
                 } else {
                     rowVariables[currentVariableIndex] = Double.parseDouble(currentLine[j]);
                     currentVariableIndex++;
                 }
             }
-            tableau[i] = new SimplexRow(rowVariables);
+            tableau[i] = new SimplexRow(rowVariables, type);
         }
         return tableau;
     }
