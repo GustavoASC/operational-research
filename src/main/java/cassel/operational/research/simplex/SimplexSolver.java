@@ -7,6 +7,7 @@ package cassel.operational.research.simplex;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -22,6 +23,8 @@ public class SimplexSolver {
      * starting from zero index
      */
     public static final int TARGET_FUNCTION_ROW_WITHIN_TABLEAU = 0;
+    /** Value to multiply the Big M for */
+    public static final int BIG_M_MULTIPLIER = 5;
     /* List with listeners to simplex tableau completions */
     private final List<SimplexListener> listeners;
 
@@ -62,6 +65,11 @@ public class SimplexSolver {
         normalizedRows = addDivisionResultColumnToRow(tableau);
         normalizedRows = normalizeEquations(normalizedRows);
         double[][] result = convertRowsToMatrix(normalizedRows);
+        result = addArtificialVariables(result);
+        // If added any artificial variable
+//        if (!(Arrays.deepEquals(result, artificial))) {
+//            result = applyBigMMethod(artificial);
+//        }
         doMaximize(result);
     }
     
@@ -155,17 +163,6 @@ public class SimplexSolver {
         }
         return normalized;
     }
-
-    /**
-     * Solves the specified tableau with maximization
-     *
-     * @param tableau
-     */
-    public void maximize(double[][] tableau) {
-        tableau = addDivisionResultColumn(tableau);
-        tableau = addSlackVariables(tableau);
-        doMaximize(tableau);
-    }
     
     /**
      * Fires a tableau iteration solved listener
@@ -182,47 +179,13 @@ public class SimplexSolver {
     }
 
     /**
-     * Adds slack variables to the specified tableau
+     * Adds artificial variables for the rows thar does not contain any basic 
+     * variable
      *
-     * @param tableau without slack variables
-     * @return tableau with slack variables
+     * @param tableau without without artificial variablesslack variables
+     * @return tableau with artificial variables added
      */
-    public double[][] addSlackVariables(double[][] tableau) {
-        double[][] tableauWithSlacks = new double[tableau.length][];
-        int totalSlackVariables = tableau.length;
-        // Adds slack variables for each row
-        for (int i = 0; i < tableau.length; i++) {
-            // References the current tableau row
-            double[] currentOriginalTableauRow = tableau[i];
-            // Creates a new array, with original row size + total slack variables to be added
-            double[] rowWithSlack = new double[currentOriginalTableauRow.length + totalSlackVariables];
-            // Clones the original tableau variables to the new array
-            // For now the value of slack variables are ignored and keep zero
-            for (int j = 0; j < currentOriginalTableauRow.length; j++) {
-                // The constraint equality is not copied yet because it will 
-                // be copied after the slack variable is inserted
-                if (j != SimplexUtils.getConstraintEqualityIndex(currentOriginalTableauRow)) {
-                    rowWithSlack[j + 1] = currentOriginalTableauRow[j];
-                }
-            }
-            // Specifies the value of the slack variable for the current row
-            int slackVariableIndex = calculateSlackIndex(currentOriginalTableauRow, i);
-                rowWithSlack[slackVariableIndex] = 1.0;
-            // Reinserts the constraint equality value
-            rowWithSlack[SimplexUtils.getConstraintEqualityIndex(rowWithSlack)] = getConstraintEqualityValue(currentOriginalTableauRow);
-            // Adds the new row to the new tableau matrix
-            tableauWithSlacks[i] = rowWithSlack;
-        }
-        return tableauWithSlacks;
-    }
-
-    /**
-     * Adds slack variables to the specified tableau
-     *
-     * @param tableau without slack variables
-     * @return tableau with slack variables
-     */
-    public double[][] addArtificialVariables(double[][] tableau) {
+    protected double[][] addArtificialVariables(double[][] tableau) {
         // Calculates the new total number of slack variables
         int totalNewVariables = 0;
         for (int i = 0; i < tableau.length; i++) {
@@ -265,13 +228,88 @@ public class SimplexSolver {
     }
     
     /**
+     * Applies the Big M Method for the specified tableau which should already
+     * contain artificial variables
+     * 
+     * @param tableau tableau with artificial variables, to apply the Big M
+     * method
+     * @return tableau with the Big M method applied
+     */
+    protected double[][] applyBigMMethod(double[][] tableau) {
+        double bigValue = generateBigMValue(tableau);
+        double[] originalFunction = tableau[TARGET_FUNCTION_ROW_WITHIN_TABLEAU];
+        double[] newObjectiveFunction = new double[originalFunction.length];
+        double[] rowsSum              = new double[originalFunction.length];
+        // Modifies the original function putting the Big M value at columns
+        // where artificial variables have been added in other rows
+        for (int j = 0; j < originalFunction.length; j++) {
+            //
+            // CASSEL: não é se possui variável básica e sim se possui variável
+            // ARTIFICIAL
+            //
+            if (j == 6 || j == 7) {
+                originalFunction[j] = bigValue;
+            }
+        }
+        // Starts from index 1 because we want to ignore the target function
+        for (int i = 1; i < tableau.length; i++) {
+            //
+            //CASSEL: não é se possui variável básica e sim se possui variável
+            // ARTIFICIAL
+            //
+            if (i == 1 || i == 2) {
+                double[] row = tableau[i];
+                // Does not use SimplexUtils.getNumberOfVariables(row) method 
+                // because we want to sum every column, even the constraint
+                // equality value, and not only variables
+                for (int j = 0; j < row.length; j++) {
+                    double currentRowValue = row[j];
+                    rowsSum[j] += currentRowValue;
+                }
+            }
+        }
+        // Iterates over the new objective function row multiplying by the
+        // Big M number
+        for (int j = 0; j < newObjectiveFunction.length; j++) {
+            double currentRowSum = rowsSum[j];
+            double originalFunctionValue = originalFunction[j];
+            double sumMultipliedByBigBalue = currentRowSum * (bigValue * -1);
+            newObjectiveFunction[j] = sumMultipliedByBigBalue + originalFunctionValue;
+        }
+        // Switches the old tableau objective function within tableau
+        tableau[TARGET_FUNCTION_ROW_WITHIN_TABLEAU] = newObjectiveFunction;
+        return tableau;
+    }
+    
+    /**
+     * Generates the Big M value for the specified tableau.
+     * 
+     * <p> The rule used is find the biggest value within the objective function
+     * row and multiply it by 
+     * 
+     * @param tableau tableau to generate the Big M value
+     * @return Big M value
+     */
+    private double generateBigMValue(double[][] tableau) {
+        double biggestValue = 0.0;
+        int variables = SimplexUtils.getNumberOfVariables(tableau[TARGET_FUNCTION_ROW_WITHIN_TABLEAU]);
+        for (int i = 0; i < variables; i++) {
+            if (tableau[TARGET_FUNCTION_ROW_WITHIN_TABLEAU][i] > biggestValue) {
+                biggestValue = tableau[TARGET_FUNCTION_ROW_WITHIN_TABLEAU][i];
+            }
+        }
+        double value = biggestValue * BIG_M_MULTIPLIER;
+        return value;
+    }
+    
+    /**
      * Adds a columns to each row repesenting the division between the last
      * result and the pivot column
      *
      * @param tableau current tableau
      * @return tableau with division result column
      */
-    public double[][] addDivisionResultColumn(double[][] tableau) {
+    protected double[][] addDivisionResultColumn(double[][] tableau) {
         double[][] tableauWithDivisionResult = new double[tableau.length][];
         for (int i = 0; i < tableau.length; i++) {
             double[] rowWithDivisionResult = new double[tableau[i].length + 1];
@@ -288,7 +326,7 @@ public class SimplexSolver {
      * @param tableau current tableau
      * @return tableau with division result column
      */
-    public SimplexRow[] addDivisionResultColumnToRow(SimplexRow[] tableau) {
+    protected SimplexRow[] addDivisionResultColumnToRow(SimplexRow[] tableau) {
         SimplexRow[] tableauWithDivisionResult = new SimplexRow[tableau.length];
         for (int i = 0; i < tableau.length; i++) {
             SimplexRow currentRow = tableau[i];
@@ -339,7 +377,7 @@ public class SimplexSolver {
      * @param tableau
      * @return
      */
-    public double[][] invertTargetFunctionSignal(double[][] tableau) {
+    protected double[][] invertTargetFunctionSignal(double[][] tableau) {
         for (int i = 0; i < tableau[TARGET_FUNCTION_ROW_WITHIN_TABLEAU].length; i++) {
             tableau[TARGET_FUNCTION_ROW_WITHIN_TABLEAU][i] = tableau[TARGET_FUNCTION_ROW_WITHIN_TABLEAU][i] * -1;
         }
@@ -352,7 +390,7 @@ public class SimplexSolver {
      * @param tableau matrix to test optimality
      * @return {@code true} if the specified tableau is optimal
      */
-    public boolean isOptimal(double[][] tableau) {
+    protected boolean isOptimal(double[][] tableau) {
         int variables = SimplexUtils.getNumberOfVariables(tableau[TARGET_FUNCTION_ROW_WITHIN_TABLEAU]);
         for (int i = 0; i < variables; i++) {
             if (tableau[TARGET_FUNCTION_ROW_WITHIN_TABLEAU][i] < 0) {
@@ -372,7 +410,7 @@ public class SimplexSolver {
      * @param tableau tableau to find the largest value
      * @return largest value index within tableau
      */
-    public int findPivotColumnIndex(double[][] tableau) {
+    protected int findPivotColumnIndex(double[][] tableau) {
         double largestValue = 0.0;
         int bestCollumnIndex = 0;
         int variables = SimplexUtils.getNumberOfVariables(tableau);
@@ -398,7 +436,7 @@ public class SimplexSolver {
      * @param pivotColumnIndex pivot column index
      * @return most appropriate pivot row index
      */
-    public int findPivotRowIndex(double[][] tableau, int pivotColumnIndex) {
+    protected int findPivotRowIndex(double[][] tableau, int pivotColumnIndex) {
         int bestRowIndex = -1;
         double smallestResult = Double.MAX_VALUE;
         for (int i = 1; i < tableau.length; i++) {
@@ -439,7 +477,7 @@ public class SimplexSolver {
      * @param columnIndex column index within tableau (pivot column)
      * @return division result
      */
-    public double calculateDivisionForRow(double[][] tableau, int rowIndex, int columnIndex) {
+    protected double calculateDivisionForRow(double[][] tableau, int rowIndex, int columnIndex) {
         double pivotValue = tableau[rowIndex][columnIndex];
         double rowResult = getConstraintEqualityValue(tableau[rowIndex]);
         double divisionResult = rowResult / pivotValue;
@@ -465,7 +503,7 @@ public class SimplexSolver {
      * @param pivotColumnIndex
      * @return
      */
-    public double[][] createTableauFromPivot(double[][] tableau, int pivotRowIndex, int pivotColumnIndex) {
+    protected double[][] createTableauFromPivot(double[][] tableau, int pivotRowIndex, int pivotColumnIndex) {
         // Creates the new and empty tableau
         double[][] newTableau = new double[tableau.length][];
         for (int i = 0; i < tableau.length; i++) {

@@ -70,6 +70,19 @@ public class SimplexUtils {
     }
     
     /**
+     * Returns {@code true} if the specified {@code rowIndes} contains any base
+     * variable
+     * 
+     * @param tableau tableau
+     * @param rowIndex target row index
+     * @return {@code true} if the row contains any base 
+     */
+    public static boolean rowContainsBaseVariable(double[][] tableau, int rowIndex) {
+        boolean contains = SimplexUtils.getBaseVariableIndexForRow(tableau, rowIndex) != -1;
+        return contains;
+    }
+    
+    /**
      * Retorna o índice da variável básica/base para a linha especificada.
      *
      * <p>
@@ -101,7 +114,6 @@ public class SimplexUtils {
         return -1;
     }
     
-    
     /**
      * Returns {@code true} if the {@code variableIndex} represents a base
      * variable.
@@ -110,7 +122,7 @@ public class SimplexUtils {
      * present within {@code baseIndexes} array.
      * 
      * @param baseIndexes base variables indexes
-     * @param variableIndex target variable to check if is a base variable
+     * @param variableIndex target variable index to check if is a base variable
      * @return {@code true} if is a base variable
      */
     public static boolean isBaseVariable(int[] baseIndexes, int variableIndex) {
