@@ -180,6 +180,24 @@ public class SimplexSolverTest {
     }
 
     @Test
+    public void testAddMissingArtificialVariablesSecondRowWithIndexesArray() {
+        SimplexSolver solver = new SimplexSolver();
+        double[][] tableau = new double[][]{
+            new double[]{1.0, 2.0, 1.0, 1.0, 0.0, 0.0, 14.0, 0.0},
+            new double[]{0.0, 4.0, 2.0, 3.0, -1.0, 0.0, 28.0, 0.0},
+            new double[]{0.0, 2.0, 5.0, 5.0, 0.0, 1.0, 30.0, 0.0},};
+        double[][] expected = new double[][]{
+            new double[]{1.0, 2.0, 1.0, 1.0, 0.0, 0.0, 0.0, 14.0, 0.0},
+            new double[]{0.0, 4.0, 2.0, 3.0, -1.0, 0.0, 1.0, 28.0, 0.0},
+            new double[]{0.0, 2.0, 5.0, 5.0, 0.0, 1.0, 0.0, 30.0, 0.0},};
+        int[] artificialIndexes = new int[tableau.length];
+        assertArrayEquals(expected, solver.addArtificialVariables(tableau, artificialIndexes));
+        assertEquals(-1, artificialIndexes[0]);
+        assertEquals(6, artificialIndexes[1]);
+        assertEquals(-1, artificialIndexes[2]);
+    }
+
+    @Test
     public void testAddMissingArtificialVariablesFirstRow() {
         SimplexSolver solver = new SimplexSolver();
         double[][] tableau = new double[][]{
@@ -234,7 +252,12 @@ public class SimplexSolverTest {
             new double[]{0.0,   1.0,   1.0, -1.0,  0.0, 0.0,  1.0,  0.0,   2000.0, 0.0},
             new double[]{0.0,   0.25,  0.75, 0.0, -1.0, 0.0,  0.0,  1.0,   1000.0, 0.0},
             new double[]{0.0,   0.05,  0.10, 0.0,  0.0, 1.0,  0.0,  0.0,    175.0, 0.0},};
-        assertArrayEquals(expected, solver.applyBigMMethod(tableau));
+        int[] artificialIndexes = new int[tableau.length];
+        artificialIndexes[0] = SimplexSolver.NO_ARTIFICIAL_VARIABLE;
+        artificialIndexes[1] =  6;
+        artificialIndexes[2] =  7;
+        artificialIndexes[3] = SimplexSolver.NO_ARTIFICIAL_VARIABLE;
+        assertArrayEquals(expected, solver.applyBigMMethod(tableau, artificialIndexes));
     }
     
     @Test

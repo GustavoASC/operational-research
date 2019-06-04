@@ -25,6 +25,8 @@ public class SimplexSolver {
     public static final int TARGET_FUNCTION_ROW_WITHIN_TABLEAU = 0;
     /** Value to multiply the Big M for */
     public static final int BIG_M_MULTIPLIER = 5;
+    /** Value indicating that the row does not contain any artificial variable */
+    public static final int NO_ARTIFICIAL_VARIABLE = -1;
     /* List with listeners to simplex tableau completions */
     private final List<SimplexListener> listeners;
 
@@ -64,13 +66,31 @@ public class SimplexSolver {
         SimplexRow[] normalizedRows;
         normalizedRows = addDivisionResultColumnToRow(tableau);
         normalizedRows = normalizeEquations(normalizedRows);
-        double[][] result = convertRowsToMatrix(normalizedRows);
-        result = addArtificialVariables(result);
-        // If added any artificial variable
-//        if (!(Arrays.deepEquals(result, artificial))) {
-//            result = applyBigMMethod(artificial);
-//        }
+        double[][] result;
+        int[] artificialIndexes = new int[tableau.length];
+        result = convertRowsToMatrix(normalizedRows);
+        result = addArtificialVariables(result, artificialIndexes);
+        if (containsArtificialVariable(artificialIndexes)) {
+            result = applyBigMMethod(result, artificialIndexes);
+        }
         doMaximize(result);
+    }
+    
+    /**
+     * Returns {@code true} if the artificial indexes array contains any 
+     * artificial variable index
+     * 
+     * @param artificialIndexes
+     * @return 
+     */
+    private boolean containsArtificialVariable(int[] artificialIndexes) {
+        for (int i = 0; i < artificialIndexes.length; i++) {
+            int currentIndex = artificialIndexes[i];
+            if (currentIndex != NO_ARTIFICIAL_VARIABLE) {
+                return true;
+            }
+        }
+        return false;
     }
     
     /**
@@ -186,6 +206,21 @@ public class SimplexSolver {
      * @return tableau with artificial variables added
      */
     protected double[][] addArtificialVariables(double[][] tableau) {
+        return addArtificialVariables(tableau, new int[tableau[TARGET_FUNCTION_ROW_WITHIN_TABLEAU].length]);
+    }
+
+    /**
+     * Adds artificial variables for the rows thar does not contain any basic 
+     * variable
+     *
+     * @param tableau without without artificial variablesslack variables
+     * @param artificialIndexes in-out array used to retain artificial indexes.
+     * This array will be populated inside this method and contains the column
+     * index where artificial variable has been added
+     * 
+     * @return tableau with artificial variables added
+     */
+    protected double[][] addArtificialVariables(double[][] tableau, int[] artificialIndexes) {
         // Calculates the new total number of slack variables
         int totalNewVariables = 0;
         for (int i = 0; i < tableau.length; i++) {
@@ -217,7 +252,11 @@ public class SimplexSolver {
                 // Specifies the value of the slack variable for the current row
                 int slackVariableIndex = calculateArtificialIndex(currentOriginalTableauRow, currentSlackIndex);
                 rowWithSlack[slackVariableIndex] = 1.0;
+                artificialIndexes[i] = slackVariableIndex;
                 currentSlackIndex++;
+            } else {
+                // This row has no artificial index
+                artificialIndexes[i] = NO_ARTIFICIAL_VARIABLE;
             }
             // Reinserts the constraint equality value
             rowWithSlack[SimplexUtils.getConstraintEqualityIndex(rowWithSlack)] = getConstraintEqualityValue(currentOriginalTableauRow);
@@ -233,9 +272,11 @@ public class SimplexSolver {
      * 
      * @param tableau tableau with artificial variables, to apply the Big M
      * method
+     * @param artificialIndexes indexes for each row representing the column
+     * index where artificial variable is placed
      * @return tableau with the Big M method applied
      */
-    protected double[][] applyBigMMethod(double[][] tableau) {
+    protected double[][] applyBigMMethod(double[][] tableau, int[] artificialIndexes) {
         double bigValue = generateBigMValue(tableau);
         double[] originalFunction = tableau[TARGET_FUNCTION_ROW_WITHIN_TABLEAU];
         double[] newObjectiveFunction = new double[originalFunction.length];
@@ -243,21 +284,13 @@ public class SimplexSolver {
         // Modifies the original function putting the Big M value at columns
         // where artificial variables have been added in other rows
         for (int j = 0; j < originalFunction.length; j++) {
-            //
-            // CASSEL: não é se possui variável básica e sim se possui variável
-            // ARTIFICIAL
-            //
-            if (j == 6 || j == 7) {
+            if (isArtificialIndex(artificialIndexes, j)) {
                 originalFunction[j] = bigValue;
             }
         }
         // Starts from index 1 because we want to ignore the target function
         for (int i = 1; i < tableau.length; i++) {
-            //
-            //CASSEL: não é se possui variável básica e sim se possui variável
-            // ARTIFICIAL
-            //
-            if (i == 1 || i == 2) {
+            if (artificialIndexes[i] != NO_ARTIFICIAL_VARIABLE) {
                 double[] row = tableau[i];
                 // Does not use SimplexUtils.getNumberOfVariables(row) method 
                 // because we want to sum every column, even the constraint
@@ -279,6 +312,24 @@ public class SimplexSolver {
         // Switches the old tableau objective function within tableau
         tableau[TARGET_FUNCTION_ROW_WITHIN_TABLEAU] = newObjectiveFunction;
         return tableau;
+    }
+    
+    /**
+     * Returns {@code true} if the specified {@code targetIndex} represents an
+     * artificial variable within {@code artificialIndexes}
+     * 
+     * @param artificialIndexes
+     * @param targetIndex
+     * @return 
+     */
+    private boolean isArtificialIndex(int[] artificialIndexes, int targetIndex) {
+        for (int i = 0; i < artificialIndexes.length; i++) {
+            int currentIndex = artificialIndexes[i];
+            if (currentIndex == targetIndex) {
+                return true;
+            }
+        }
+        return false;
     }
     
     /**

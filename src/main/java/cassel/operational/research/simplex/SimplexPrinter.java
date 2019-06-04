@@ -60,17 +60,17 @@ public class SimplexPrinter implements SimplexSolver.SimplexListener {
     private void printHeader(double[][] tableau) {
         printRowSeparator(tableau);
         System.out.print("|");
-        System.out.print("  Base");
+        System.out.print("     Base");
         System.out.print("|");
-        System.out.print("Vlr.Co");
+        System.out.print("Valor.Cor");
         System.out.print("|");
         int variables = SimplexUtils.getNumberOfVariables(tableau);
         for (int i = 0; i < variables; i++) {
-            System.out.print("    x" + i);
+            System.out.print("       x" + i);
             System.out.print("|");
         }
-        System.out.print(" Linha|");
-        System.out.print("Divis.|");
+        System.out.print("    Linha|");
+        System.out.print("   Divis.|");
         System.out.println("");
     }
 
@@ -87,7 +87,7 @@ public class SimplexPrinter implements SimplexSolver.SimplexListener {
         int totalColumns = variables + 1 + 1 + 1 + 1;
         for (int i = 0; i < totalColumns; i++) {
             System.out.print("+");
-            System.out.print(repeat("-", 6));
+            System.out.print(repeat("-", 9));
         }
         System.out.print("+");
         System.out.println();
@@ -116,9 +116,9 @@ public class SimplexPrinter implements SimplexSolver.SimplexListener {
         // If double value has no decimal
         String formatted;
         if (value % 1 == 0) {
-            formatted = String.format("%6d", (int) value);
+            formatted = String.format("%9d", (int) value);
         } else {
-            formatted = String.format("%6.2f", value);
+            formatted = String.format("%9.2f", value);
         }
         System.out.print(formatted);
     }
@@ -140,7 +140,7 @@ public class SimplexPrinter implements SimplexSolver.SimplexListener {
      * @param lineNumber
      */
     private void printLineNumber(int lineNumber) {
-        System.out.print(String.format("%6d", lineNumber));
+        System.out.print(String.format("%9d", lineNumber));
         System.out.print("|");
     }
 
@@ -163,7 +163,7 @@ public class SimplexPrinter implements SimplexSolver.SimplexListener {
      */
     private void printBaseVariableForRow(double[][] tableau, int rowIndex) {
         int baseIndex = SimplexUtils.getBaseVariableIndexForRow(tableau, rowIndex);
-        System.out.print("    x" + baseIndex);
+        System.out.print("       x" + baseIndex);
         System.out.print("|");
     }
     
