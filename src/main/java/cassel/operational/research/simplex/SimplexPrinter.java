@@ -66,8 +66,7 @@ public class SimplexPrinter implements SimplexSolver.SimplexListener {
         System.out.print("|");
         int variables = SimplexUtils.getNumberOfVariables(tableau);
         for (int i = 0; i < variables; i++) {
-            System.out.print("       x" + i);
-            System.out.print("|");
+            printVariableName(i);
         }
         System.out.print("    Linha|");
         System.out.print("   Divis.|");
@@ -163,7 +162,18 @@ public class SimplexPrinter implements SimplexSolver.SimplexListener {
      */
     private void printBaseVariableForRow(double[][] tableau, int rowIndex) {
         int baseIndex = SimplexUtils.getBaseVariableIndexForRow(tableau, rowIndex);
-        System.out.print("       x" + baseIndex);
+        printVariableName(baseIndex);
+    }
+
+    /**
+     * Prints the variable name from it's index
+     * 
+     * @param variableIndex variable index
+     */
+    private void printVariableName(int variableIndex) {
+        String variableName = "x" + Integer.toString(variableIndex);
+        String spaces = repeat(" ", 9 - variableName.length());
+        System.out.print(spaces + variableName);
         System.out.print("|");
     }
     
