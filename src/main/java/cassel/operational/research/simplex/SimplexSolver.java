@@ -177,7 +177,9 @@ public class SimplexSolver {
                 rowWithSlack[slackVariableIndex] = -1.0;
             }
             // Reinserts the constraint equality value
-            rowWithSlack[SimplexUtils.getConstraintEqualityIndex(rowWithSlack)] = getConstraintEqualityValue(currentOriginalTableauRow);
+            int constraintEqualityIndex = SimplexUtils.getConstraintEqualityIndex(rowWithSlack);
+            double constraintEqualityValue = getConstraintEqualityValue(currentOriginalTableauRow);
+            rowWithSlack[constraintEqualityIndex] = constraintEqualityValue;
             // Adds the new row to the new tableau matrix
             normalized[i] = new SimplexRow(rowWithSlack, EqualityType.EQUAL, row.getEqualityValue(), row.getDivisionResult());
         }
