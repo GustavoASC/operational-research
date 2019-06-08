@@ -73,6 +73,7 @@ public class SimplexSolver {
         if (containsArtificialVariable(artificialIndexes)) {
             result = applyBigMMethod(result, artificialIndexes);
         }
+        result = moveTargetFunctionBaseVariableToBeginning(result);
         doMaximize(result);
     }
     
@@ -114,6 +115,28 @@ public class SimplexSolver {
             }
             // Inserts the new array into the matrix
             tableau[i] = doubleRow;
+        }
+        return tableau;
+    }
+    
+    /**
+     * This method guarantees that the base variable wwithin target function row
+     * is on the first position inside the array
+     * 
+     * @param tableau tableau
+     * @return tableau with the base variable of the target function on the
+     * first position
+     */
+    protected double[][] moveTargetFunctionBaseVariableToBeginning(double[][] tableau) {
+        int currentBaseIndex = SimplexUtils.getBaseVariableIndexForRow(tableau, TARGET_FUNCTION_ROW_WITHIN_TABLEAU);
+        if (currentBaseIndex <= 0) {
+            return tableau;
+        }
+        for (int i = 0; i < tableau.length; i++) {
+            double[] row = tableau[i];
+            double currentFirstValue = row[0];
+            row[0] = row[currentBaseIndex];
+            row[currentBaseIndex] = currentFirstValue;
         }
         return tableau;
     }

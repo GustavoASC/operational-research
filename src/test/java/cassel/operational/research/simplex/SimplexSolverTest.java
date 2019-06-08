@@ -105,6 +105,37 @@ public class SimplexSolverTest {
         double[][] result = solver.convertRowsToMatrix(normalizedRows);
         assertArrayEquals(expected, result);
     }
+    
+
+    @Test
+    public void testMoveTargetFunctionBaseVariableToBeginningAlreadyOk() {
+        SimplexSolver solver = new SimplexSolver();
+        double[][] tableau = new double[][]{
+            new double[]{1.0, 5.0, 2.0, 5.0},
+            new double[]{0.0, 2.0, 4.0, -1.0},
+            new double[]{0.0, 5.0, 2.0, 0.0}};
+        double[][] expected = new double[][]{
+            new double[]{1.0, 5.0, 2.0, 5.0},
+            new double[]{0.0, 2.0, 4.0, -1.0},
+            new double[]{0.0, 5.0, 2.0, 0.0}};
+        double[][] result = solver.moveTargetFunctionBaseVariableToBeginning(tableau);
+        assertArrayEquals(expected, result);
+    }
+
+    @Test
+    public void testMoveTargetFunctionBaseVariableToBeginning() {
+        SimplexSolver solver = new SimplexSolver();
+        double[][] tableau = new double[][]{
+            new double[]{2.0, 5.0, 1.0, 3.3, 5.0},
+            new double[]{4.0, 2.0, 0.0, 3.3, -1.0},
+            new double[]{2.0, 5.0, 0.0, 3.3, 0.0}};
+        double[][] expected = new double[][]{
+            new double[]{1.0, 5.0, 2.0, 3.3, 5.0},
+            new double[]{0.0, 2.0, 4.0, 3.3, -1.0},
+            new double[]{0.0, 5.0, 2.0, 3.3, 0.0}};
+        double[][] result = solver.moveTargetFunctionBaseVariableToBeginning(tableau);
+        assertArrayEquals(expected, result);
+    }
 
     @Test
     public void testNormalizeEquationsGreaterOrEqualSingleSmallRow() {
